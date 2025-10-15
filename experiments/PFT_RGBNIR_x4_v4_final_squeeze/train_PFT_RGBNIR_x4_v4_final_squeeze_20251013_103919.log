@@ -1,0 +1,1886 @@
+2025-10-13 10:39:19,291 INFO: 
+                ____                _       _____  ____
+               / __ ) ____ _ _____ (_)_____/ ___/ / __ \
+              / __  |/ __ `// ___// // ___/\__ \ / /_/ /
+             / /_/ // /_/ /(__  )/ // /__ ___/ // _, _/
+            /_____/ \__,_//____//_/ \___//____//_/ |_|
+     ______                   __   __                 __      __
+    / ____/____   ____   ____/ /  / /   __  __ _____ / /__   / /
+   / / __ / __ \ / __ \ / __  /  / /   / / / // ___// //_/  / /
+  / /_/ // /_/ // /_/ // /_/ /  / /___/ /_/ // /__ / /<    /_/
+  \____/ \____/ \____/ \____/  /_____/\____/ \___//_/|_|  (_)
+    
+Version Information: 
+	BasicSR: 0.1.1
+	PyTorch: 2.5.0+cu124
+	TorchVision: 0.19.1
+2025-10-13 10:39:19,291 INFO: 
+  name: PFT_RGBNIR_x4_v4_final_squeeze
+  model_type: PFTModel
+  scale: 4
+  num_gpu: 1
+  manual_seed: 42
+  find_unused_parameters: True
+  datasets:[
+    train:[
+      name: RGBNIR_SR_train
+      type: PairedImageDataset
+      dataroot_gt: /home/jovyan/SEN2NAIP_5k/GT
+      dataroot_lq: /home/jovyan/SEN2NAIP_5k/LQ
+      io_backend:[
+        type: disk
+      ]
+      filename_tmpl: {}
+      gt_size: 256
+      use_hflip: True
+      use_rot: True
+      num_worker_per_gpu: 8
+      batch_size_per_gpu: 4
+      dataset_enlarge_ratio: 1
+      prefetch_mode: cuda
+      pin_memory: True
+      persistent_workers: True
+      mean: [0.3509425779495244, 0.34561040795129644, 0.3249112233408325, 0.42880553175091063]
+      std: [0.24811651260931947, 0.23533273043039063, 0.23810627353924005, 0.23423836950402813]
+      phase: train
+      scale: 4
+    ]
+    val:[
+      name: RGBNIR_val
+      type: PairedImageDataset
+      dataroot_gt: /home/jovyan/SEN2NAIP_5k_val/GT
+      dataroot_lq: /home/jovyan/SEN2NAIP_5k_val/LQ
+      io_backend:[
+        type: disk
+      ]
+      mean: [0.3509425779495244, 0.34561040795129644, 0.3249112233408325, 0.42880553175091063]
+      std: [0.24811651260931947, 0.23533273043039063, 0.23810627353924005, 0.23423836950402813]
+      phase: val
+      scale: 4
+    ]
+  ]
+  network_g:[
+    type: PFT
+    upscale: 4
+    in_chans: 4
+    embed_dim: 240
+    depths: [4, 4, 4, 6, 6, 6]
+    num_heads: 6
+    num_topk: [1024, 1024, 1024, 1024, 256, 256, 256, 256, 128, 128, 128, 128, 64, 64, 64, 64, 64, 64, 32, 32, 32, 32, 32, 32, 16, 16, 16, 16, 16, 16]
+    window_size: 32
+    convffn_kernel_size: 7
+    mlp_ratio: 2.0
+    upsampler: pixelshuffle
+    resi_connection: 1conv
+    use_checkpoint: True
+    img_range: 1.0
+  ]
+  path:[
+    pretrain_network_g: experiments/PFT_RGBNIR_x4_v4/models/net_g_latest.pth
+    strict_load_g: True
+    resume_state: None
+    experiments_root: /home/jovyan/PFT-SR_v3_down/experiments/PFT_RGBNIR_x4_v4_final_squeeze
+    models: /home/jovyan/PFT-SR_v3_down/experiments/PFT_RGBNIR_x4_v4_final_squeeze/models
+    training_states: /home/jovyan/PFT-SR_v3_down/experiments/PFT_RGBNIR_x4_v4_final_squeeze/training_states
+    log: /home/jovyan/PFT-SR_v3_down/experiments/PFT_RGBNIR_x4_v4_final_squeeze
+    visualization: /home/jovyan/PFT-SR_v3_down/experiments/PFT_RGBNIR_x4_v4_final_squeeze/visualization
+  ]
+  train:[
+    ema_decay: 0.999
+    optim_g:[
+      type: AdamW
+      lr: 5e-06
+      weight_decay: 0
+      betas: [0.9, 0.99]
+    ]
+    scheduler:[
+      type: MultiStepLR
+      milestones: [150000, 225000, 270000, 290000]
+      gamma: 0.5
+    ]
+    total_iter: 330000
+    warmup_iter: 0
+    pixel_opt:[
+      type: L1Loss
+      loss_weight: 1.0
+      reduction: mean
+    ]
+  ]
+  val:[
+    val_freq: 500
+    save_img: True
+    metrics:[
+      psnr:[
+        type: calculate_psnr
+        crop_border: 4
+        test_y_channel: False
+      ]
+      ssim:[
+        type: calculate_ssim
+        crop_border: 4
+        test_y_channel: False
+      ]
+    ]
+  ]
+  logger:[
+    print_freq: 100
+    save_checkpoint_freq: 5000
+    use_tb_logger: False
+  ]
+  dist_params:[
+    backend: nccl
+    port: 29500
+  ]
+  dist: False
+  rank: 0
+  world_size: 1
+  auto_resume: False
+  is_train: True
+  root_path: /home/jovyan/PFT-SR_v3_down
+
+2025-10-13 10:39:20,226 INFO: Dataset [PairedImageDataset] - RGBNIR_SR_train is built.
+2025-10-13 10:39:20,227 INFO: Training statistics:
+	Number of train images: 5000
+	Dataset enlarge ratio: 1
+	Batch size per gpu: 4
+	World size (gpu number): 1
+	Require iter number per epoch: 1250
+	Total epochs: 264; iters: 330000.
+2025-10-13 10:39:20,230 INFO: Dataset [PairedImageDataset] - RGBNIR_val is built.
+2025-10-13 10:39:20,230 INFO: Number of val images/folders in RGBNIR_val: 100
+2025-10-13 10:39:20,759 INFO: Network [PFT] is created.
+2025-10-13 10:39:21,125 INFO: Network: PFT, with parameters: 19,773,976
+2025-10-13 10:39:21,126 INFO: PFT(
+  (conv_first): Conv2d(4, 240, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (patch_embed): PatchEmbed(
+    (norm): LayerNorm((240,), eps=1e-05, elementwise_affine=True)
+  )
+  (patch_unembed): PatchUnEmbed()
+  (layers): ModuleList(
+    (0-2): 3 x PFTB(
+      (patch_embed): PatchEmbed()
+      (patch_unembed): PatchUnEmbed()
+      (residual_group): BasicBlock(
+        dim=240, input_resolution=(64, 64), depth=4
+        (layers): ModuleList(
+          (0-3): 4 x PFTransformerLayer(
+            (softmax): Softmax(dim=-1)
+            (lrelu): LeakyReLU(negative_slope=0.01)
+            (sigmoid): Sigmoid()
+            (norm1): LayerNorm((240,), eps=1e-05, elementwise_affine=True)
+            (norm2): LayerNorm((240,), eps=1e-05, elementwise_affine=True)
+            (wqkv): Linear(in_features=240, out_features=720, bias=True)
+            (v_LePE): dwconv(
+              (depthwise_conv): Sequential(
+                (0): Conv2d(240, 240, kernel_size=(7, 7), stride=(1, 1), padding=(3, 3), groups=240)
+                (1): GELU(approximate='none')
+              )
+            )
+            (attn_win): WindowAttention(
+              dim=240, window_size=(32, 32), num_heads=6, qkv_bias=True
+              (proj): Linear(in_features=240, out_features=240, bias=True)
+              (softmax): Softmax(dim=-1)
+            )
+            (convffn): ConvFFN(
+              (fc1): Linear(in_features=240, out_features=480, bias=True)
+              (act): GELU(approximate='none')
+              (dwconv): dwconv(
+                (depthwise_conv): Sequential(
+                  (0): Conv2d(480, 480, kernel_size=(7, 7), stride=(1, 1), padding=(3, 3), groups=480)
+                  (1): GELU(approximate='none')
+                )
+              )
+              (fc2): Linear(in_features=480, out_features=240, bias=True)
+            )
+          )
+        )
+      )
+      (conv): Conv2d(240, 240, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    )
+    (3-5): 3 x PFTB(
+      (patch_embed): PatchEmbed()
+      (patch_unembed): PatchUnEmbed()
+      (residual_group): BasicBlock(
+        dim=240, input_resolution=(64, 64), depth=6
+        (layers): ModuleList(
+          (0-5): 6 x PFTransformerLayer(
+            (softmax): Softmax(dim=-1)
+            (lrelu): LeakyReLU(negative_slope=0.01)
+            (sigmoid): Sigmoid()
+            (norm1): LayerNorm((240,), eps=1e-05, elementwise_affine=True)
+            (norm2): LayerNorm((240,), eps=1e-05, elementwise_affine=True)
+            (wqkv): Linear(in_features=240, out_features=720, bias=True)
+            (v_LePE): dwconv(
+              (depthwise_conv): Sequential(
+                (0): Conv2d(240, 240, kernel_size=(7, 7), stride=(1, 1), padding=(3, 3), groups=240)
+                (1): GELU(approximate='none')
+              )
+            )
+            (attn_win): WindowAttention(
+              dim=240, window_size=(32, 32), num_heads=6, qkv_bias=True
+              (proj): Linear(in_features=240, out_features=240, bias=True)
+              (softmax): Softmax(dim=-1)
+            )
+            (convffn): ConvFFN(
+              (fc1): Linear(in_features=240, out_features=480, bias=True)
+              (act): GELU(approximate='none')
+              (dwconv): dwconv(
+                (depthwise_conv): Sequential(
+                  (0): Conv2d(480, 480, kernel_size=(7, 7), stride=(1, 1), padding=(3, 3), groups=480)
+                  (1): GELU(approximate='none')
+                )
+              )
+              (fc2): Linear(in_features=480, out_features=240, bias=True)
+            )
+          )
+        )
+      )
+      (conv): Conv2d(240, 240, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    )
+  )
+  (norm): LayerNorm((240,), eps=1e-05, elementwise_affine=True)
+  (conv_after_body): Conv2d(240, 240, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (conv_before_upsample): Sequential(
+    (0): Conv2d(240, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): LeakyReLU(negative_slope=0.01, inplace=True)
+  )
+  (upsample): Upsample(
+    (0): Conv2d(64, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): PixelShuffle(upscale_factor=2)
+    (2): Conv2d(64, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (3): PixelShuffle(upscale_factor=2)
+  )
+  (conv_last): Conv2d(64, 4, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+)
+2025-10-13 10:39:21,236 INFO: Loading PFT model from experiments/PFT_RGBNIR_x4_v4/models/net_g_latest.pth, with param key: [params].
+2025-10-13 10:39:21,288 INFO: Use Exponential Moving Average with decay: 0.999
+2025-10-13 10:39:21,291 INFO: Network: PFT, with parameters: 19,773,976
+2025-10-13 10:39:21,291 INFO: PFT(
+  (conv_first): Conv2d(4, 240, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (patch_embed): PatchEmbed(
+    (norm): LayerNorm((240,), eps=1e-05, elementwise_affine=True)
+  )
+  (patch_unembed): PatchUnEmbed()
+  (layers): ModuleList(
+    (0-2): 3 x PFTB(
+      (patch_embed): PatchEmbed()
+      (patch_unembed): PatchUnEmbed()
+      (residual_group): BasicBlock(
+        dim=240, input_resolution=(64, 64), depth=4
+        (layers): ModuleList(
+          (0-3): 4 x PFTransformerLayer(
+            (softmax): Softmax(dim=-1)
+            (lrelu): LeakyReLU(negative_slope=0.01)
+            (sigmoid): Sigmoid()
+            (norm1): LayerNorm((240,), eps=1e-05, elementwise_affine=True)
+            (norm2): LayerNorm((240,), eps=1e-05, elementwise_affine=True)
+            (wqkv): Linear(in_features=240, out_features=720, bias=True)
+            (v_LePE): dwconv(
+              (depthwise_conv): Sequential(
+                (0): Conv2d(240, 240, kernel_size=(7, 7), stride=(1, 1), padding=(3, 3), groups=240)
+                (1): GELU(approximate='none')
+              )
+            )
+            (attn_win): WindowAttention(
+              dim=240, window_size=(32, 32), num_heads=6, qkv_bias=True
+              (proj): Linear(in_features=240, out_features=240, bias=True)
+              (softmax): Softmax(dim=-1)
+            )
+            (convffn): ConvFFN(
+              (fc1): Linear(in_features=240, out_features=480, bias=True)
+              (act): GELU(approximate='none')
+              (dwconv): dwconv(
+                (depthwise_conv): Sequential(
+                  (0): Conv2d(480, 480, kernel_size=(7, 7), stride=(1, 1), padding=(3, 3), groups=480)
+                  (1): GELU(approximate='none')
+                )
+              )
+              (fc2): Linear(in_features=480, out_features=240, bias=True)
+            )
+          )
+        )
+      )
+      (conv): Conv2d(240, 240, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    )
+    (3-5): 3 x PFTB(
+      (patch_embed): PatchEmbed()
+      (patch_unembed): PatchUnEmbed()
+      (residual_group): BasicBlock(
+        dim=240, input_resolution=(64, 64), depth=6
+        (layers): ModuleList(
+          (0-5): 6 x PFTransformerLayer(
+            (softmax): Softmax(dim=-1)
+            (lrelu): LeakyReLU(negative_slope=0.01)
+            (sigmoid): Sigmoid()
+            (norm1): LayerNorm((240,), eps=1e-05, elementwise_affine=True)
+            (norm2): LayerNorm((240,), eps=1e-05, elementwise_affine=True)
+            (wqkv): Linear(in_features=240, out_features=720, bias=True)
+            (v_LePE): dwconv(
+              (depthwise_conv): Sequential(
+                (0): Conv2d(240, 240, kernel_size=(7, 7), stride=(1, 1), padding=(3, 3), groups=240)
+                (1): GELU(approximate='none')
+              )
+            )
+            (attn_win): WindowAttention(
+              dim=240, window_size=(32, 32), num_heads=6, qkv_bias=True
+              (proj): Linear(in_features=240, out_features=240, bias=True)
+              (softmax): Softmax(dim=-1)
+            )
+            (convffn): ConvFFN(
+              (fc1): Linear(in_features=240, out_features=480, bias=True)
+              (act): GELU(approximate='none')
+              (dwconv): dwconv(
+                (depthwise_conv): Sequential(
+                  (0): Conv2d(480, 480, kernel_size=(7, 7), stride=(1, 1), padding=(3, 3), groups=480)
+                  (1): GELU(approximate='none')
+                )
+              )
+              (fc2): Linear(in_features=480, out_features=240, bias=True)
+            )
+          )
+        )
+      )
+      (conv): Conv2d(240, 240, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    )
+  )
+  (norm): LayerNorm((240,), eps=1e-05, elementwise_affine=True)
+  (conv_after_body): Conv2d(240, 240, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (conv_before_upsample): Sequential(
+    (0): Conv2d(240, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): LeakyReLU(negative_slope=0.01, inplace=True)
+  )
+  (upsample): Upsample(
+    (0): Conv2d(64, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): PixelShuffle(upscale_factor=2)
+    (2): Conv2d(64, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (3): PixelShuffle(upscale_factor=2)
+  )
+  (conv_last): Conv2d(64, 4, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+)
+2025-10-13 10:39:21,520 INFO: Loading PFT model from experiments/PFT_RGBNIR_x4_v4/models/net_g_latest.pth, with param key: [params_ema].
+2025-10-13 10:39:21,565 INFO: Loss [L1Loss] is created.
+2025-10-13 10:39:21,566 INFO: Model [PFTModel] is created.
+2025-10-13 10:39:21,569 INFO: Trainable parameters: 19773976 / 19773976
+2025-10-13 10:39:21,775 INFO: Use cuda prefetch dataloader
+2025-10-13 10:39:21,776 INFO: Start training from epoch: 0, iter: 0
+2025-10-13 10:41:42,414 INFO: [PFT_R..][epoch:  0, iter:     100, lr:(5.000e-06,)] [eta: 5 days, 5:09:58, time (data): 1.406 (0.002)] l_pix: 6.9625e-02 
+2025-10-13 10:44:02,175 INFO: [PFT_R..][epoch:  0, iter:     200, lr:(5.000e-06,)] [eta: 5 days, 6:34:29, time (data): 1.402 (0.001)] l_pix: 4.5544e-02 
+2025-10-13 10:46:22,055 INFO: [PFT_R..][epoch:  0, iter:     300, lr:(5.000e-06,)] [eta: 5 days, 7:03:29, time (data): 1.399 (0.000)] l_pix: 7.7799e-02 
+2025-10-13 10:48:41,894 INFO: [PFT_R..][epoch:  0, iter:     400, lr:(5.000e-06,)] [eta: 5 days, 7:16:17, time (data): 1.399 (0.001)] l_pix: 5.9702e-02 
+2025-10-13 10:51:01,716 INFO: [PFT_R..][epoch:  0, iter:     500, lr:(5.000e-06,)] [eta: 5 days, 7:22:52, time (data): 1.398 (0.001)] l_pix: 5.7880e-02 
+2025-10-13 10:51:25,481 INFO: Validation RGBNIR_val
+	 # psnr: 24.9182	Best: 24.9182 @ 500 iter
+	 # ssim: 0.6686	Best: 0.6686 @ 500 iter
+
+2025-10-13 10:53:45,350 INFO: [PFT_R..][epoch:  0, iter:     600, lr:(5.000e-06,)] [eta: 5 days, 11:03:59, time (data): 1.398 (0.001)] l_pix: 6.3273e-02 
+2025-10-13 10:56:05,358 INFO: [PFT_R..][epoch:  0, iter:     700, lr:(5.000e-06,)] [eta: 5 days, 10:36:17, time (data): 1.400 (0.001)] l_pix: 6.7308e-02 
+2025-10-13 10:58:25,497 INFO: [PFT_R..][epoch:  0, iter:     800, lr:(5.000e-06,)] [eta: 5 days, 10:15:48, time (data): 1.401 (0.001)] l_pix: 4.3630e-02 
+2025-10-13 11:00:45,374 INFO: [PFT_R..][epoch:  0, iter:     900, lr:(5.000e-06,)] [eta: 5 days, 9:57:45, time (data): 1.399 (0.001)] l_pix: 6.8949e-02 
+2025-10-13 11:03:05,070 INFO: [PFT_R..][epoch:  0, iter:   1,000, lr:(5.000e-06,)] [eta: 5 days, 9:41:51, time (data): 1.398 (0.001)] l_pix: 6.3627e-02 
+2025-10-13 11:03:28,183 INFO: Validation RGBNIR_val
+	 # psnr: 24.9187	Best: 24.9187 @ 1000 iter
+	 # ssim: 0.6686	Best: 0.6686 @ 1000 iter
+
+2025-10-13 11:05:47,850 INFO: [PFT_R..][epoch:  0, iter:   1,100, lr:(5.000e-06,)] [eta: 5 days, 11:23:21, time (data): 1.397 (0.000)] l_pix: 6.7987e-02 
+2025-10-13 11:08:07,755 INFO: [PFT_R..][epoch:  0, iter:   1,200, lr:(5.000e-06,)] [eta: 5 days, 11:03:07, time (data): 1.398 (0.000)] l_pix: 6.6076e-02 
+2025-10-13 11:10:27,742 INFO: [PFT_R..][epoch:  1, iter:   1,300, lr:(5.000e-06,)] [eta: 5 days, 10:45:59, time (data): 1.400 (0.001)] l_pix: 7.9866e-02 
+2025-10-13 11:12:47,693 INFO: [PFT_R..][epoch:  1, iter:   1,400, lr:(5.000e-06,)] [eta: 5 days, 10:30:50, time (data): 1.400 (0.001)] l_pix: 5.8309e-02 
+2025-10-13 11:15:07,615 INFO: [PFT_R..][epoch:  1, iter:   1,500, lr:(5.000e-06,)] [eta: 5 days, 10:17:16, time (data): 1.399 (0.000)] l_pix: 5.6962e-02 
+2025-10-13 11:15:30,558 INFO: Validation RGBNIR_val
+	 # psnr: 24.9190	Best: 24.9190 @ 1500 iter
+	 # ssim: 0.6686	Best: 0.6686 @ 1500 iter
+
+2025-10-13 11:17:50,462 INFO: [PFT_R..][epoch:  1, iter:   1,600, lr:(5.000e-06,)] [eta: 5 days, 11:23:29, time (data): 1.399 (0.000)] l_pix: 6.3185e-02 
+2025-10-13 11:20:10,390 INFO: [PFT_R..][epoch:  1, iter:   1,700, lr:(5.000e-06,)] [eta: 5 days, 11:07:52, time (data): 1.399 (0.000)] l_pix: 5.7237e-02 
+2025-10-13 11:22:30,206 INFO: [PFT_R..][epoch:  1, iter:   1,800, lr:(5.000e-06,)] [eta: 5 days, 10:53:24, time (data): 1.399 (0.000)] l_pix: 5.3923e-02 
+2025-10-13 11:24:50,073 INFO: [PFT_R..][epoch:  1, iter:   1,900, lr:(5.000e-06,)] [eta: 5 days, 10:40:21, time (data): 1.399 (0.000)] l_pix: 6.0001e-02 
+2025-10-13 11:27:09,814 INFO: [PFT_R..][epoch:  1, iter:   2,000, lr:(5.000e-06,)] [eta: 5 days, 10:28:01, time (data): 1.398 (0.000)] l_pix: 5.8139e-02 
+2025-10-13 11:27:32,878 INFO: Validation RGBNIR_val
+	 # psnr: 24.9192	Best: 24.9192 @ 2000 iter
+	 # ssim: 0.6687	Best: 0.6687 @ 2000 iter
+
+2025-10-13 11:29:52,725 INFO: [PFT_R..][epoch:  1, iter:   2,100, lr:(5.000e-06,)] [eta: 5 days, 11:16:55, time (data): 1.398 (0.000)] l_pix: 6.9478e-02 
+2025-10-13 11:32:12,712 INFO: [PFT_R..][epoch:  1, iter:   2,200, lr:(5.000e-06,)] [eta: 5 days, 11:04:13, time (data): 1.399 (0.000)] l_pix: 6.0586e-02 
+2025-10-13 11:34:32,634 INFO: [PFT_R..][epoch:  1, iter:   2,300, lr:(5.000e-06,)] [eta: 5 days, 10:52:16, time (data): 1.399 (0.000)] l_pix: 5.2191e-02 
+2025-10-13 11:36:52,384 INFO: [PFT_R..][epoch:  1, iter:   2,400, lr:(5.000e-06,)] [eta: 5 days, 10:40:43, time (data): 1.398 (0.000)] l_pix: 4.3272e-02 
+2025-10-13 11:39:12,230 INFO: [PFT_R..][epoch:  1, iter:   2,500, lr:(5.000e-06,)] [eta: 5 days, 10:30:08, time (data): 1.399 (0.000)] l_pix: 4.5965e-02 
+2025-10-13 11:39:35,475 INFO: Validation RGBNIR_val
+	 # psnr: 24.9194	Best: 24.9194 @ 2500 iter
+	 # ssim: 0.6687	Best: 0.6687 @ 2500 iter
+
+2025-10-13 11:41:55,357 INFO: [PFT_R..][epoch:  2, iter:   2,600, lr:(5.000e-06,)] [eta: 5 days, 11:09:01, time (data): 1.399 (0.001)] l_pix: 6.8350e-02 
+2025-10-13 11:44:15,294 INFO: [PFT_R..][epoch:  2, iter:   2,700, lr:(5.000e-06,)] [eta: 5 days, 10:57:59, time (data): 1.400 (0.000)] l_pix: 5.6391e-02 
+2025-10-13 11:46:35,218 INFO: [PFT_R..][epoch:  2, iter:   2,800, lr:(5.000e-06,)] [eta: 5 days, 10:47:33, time (data): 1.399 (0.000)] l_pix: 5.4998e-02 
+2025-10-13 11:48:55,217 INFO: [PFT_R..][epoch:  2, iter:   2,900, lr:(5.000e-06,)] [eta: 5 days, 10:37:48, time (data): 1.400 (0.000)] l_pix: 6.0506e-02 
+2025-10-13 11:51:15,130 INFO: [PFT_R..][epoch:  2, iter:   3,000, lr:(5.000e-06,)] [eta: 5 days, 10:28:24, time (data): 1.399 (0.000)] l_pix: 5.1175e-02 
+2025-10-13 11:51:38,050 INFO: Validation RGBNIR_val
+	 # psnr: 24.9197	Best: 24.9197 @ 3000 iter
+	 # ssim: 0.6687	Best: 0.6687 @ 3000 iter
+
+2025-10-13 11:53:57,843 INFO: [PFT_R..][epoch:  2, iter:   3,100, lr:(5.000e-06,)] [eta: 5 days, 10:59:31, time (data): 1.398 (0.000)] l_pix: 6.2192e-02 
+2025-10-13 11:56:17,502 INFO: [PFT_R..][epoch:  2, iter:   3,200, lr:(5.000e-06,)] [eta: 5 days, 10:49:18, time (data): 1.397 (0.000)] l_pix: 6.8676e-02 
+2025-10-13 11:58:37,345 INFO: [PFT_R..][epoch:  2, iter:   3,300, lr:(5.000e-06,)] [eta: 5 days, 10:39:51, time (data): 1.399 (0.000)] l_pix: 6.5505e-02 
+2025-10-13 12:00:57,266 INFO: [PFT_R..][epoch:  2, iter:   3,400, lr:(5.000e-06,)] [eta: 5 days, 10:30:57, time (data): 1.399 (0.000)] l_pix: 6.2112e-02 
+2025-10-13 12:03:17,051 INFO: [PFT_R..][epoch:  2, iter:   3,500, lr:(5.000e-06,)] [eta: 5 days, 10:22:13, time (data): 1.398 (0.000)] l_pix: 5.8224e-02 
+2025-10-13 12:03:40,254 INFO: Validation RGBNIR_val
+	 # psnr: 24.9196	Best: 24.9197 @ 3000 iter
+	 # ssim: 0.6687	Best: 0.6687 @ 3500 iter
+
+2025-10-13 12:06:00,092 INFO: [PFT_R..][epoch:  2, iter:   3,600, lr:(5.000e-06,)] [eta: 5 days, 10:48:58, time (data): 1.398 (0.000)] l_pix: 5.0535e-02 
+2025-10-13 12:08:20,005 INFO: [PFT_R..][epoch:  2, iter:   3,700, lr:(5.000e-06,)] [eta: 5 days, 10:40:08, time (data): 1.399 (0.000)] l_pix: 5.0179e-02 
+2025-10-13 12:10:39,852 INFO: [PFT_R..][epoch:  3, iter:   3,800, lr:(5.000e-06,)] [eta: 5 days, 10:31:33, time (data): 1.399 (0.001)] l_pix: 5.2249e-02 
+2025-10-13 12:12:59,689 INFO: [PFT_R..][epoch:  3, iter:   3,900, lr:(5.000e-06,)] [eta: 5 days, 10:23:17, time (data): 1.399 (0.000)] l_pix: 8.6742e-02 
+2025-10-13 12:15:19,697 INFO: [PFT_R..][epoch:  3, iter:   4,000, lr:(5.000e-06,)] [eta: 5 days, 10:15:33, time (data): 1.399 (0.000)] l_pix: 4.7276e-02 
+2025-10-13 12:15:42,785 INFO: Validation RGBNIR_val
+	 # psnr: 24.9196	Best: 24.9197 @ 3000 iter
+	 # ssim: 0.6687	Best: 0.6687 @ 4000 iter
+
+2025-10-13 12:18:02,564 INFO: [PFT_R..][epoch:  3, iter:   4,100, lr:(5.000e-06,)] [eta: 5 days, 10:38:20, time (data): 1.398 (0.000)] l_pix: 6.6677e-02 
+2025-10-13 12:20:22,696 INFO: [PFT_R..][epoch:  3, iter:   4,200, lr:(5.000e-06,)] [eta: 5 days, 10:30:32, time (data): 1.400 (0.000)] l_pix: 6.4741e-02 
+2025-10-13 12:22:42,638 INFO: [PFT_R..][epoch:  3, iter:   4,300, lr:(5.000e-06,)] [eta: 5 days, 10:22:45, time (data): 1.399 (0.000)] l_pix: 6.8362e-02 
+2025-10-13 12:25:02,531 INFO: [PFT_R..][epoch:  3, iter:   4,400, lr:(5.000e-06,)] [eta: 5 days, 10:15:09, time (data): 1.399 (0.000)] l_pix: 6.7448e-02 
+2025-10-13 12:27:22,346 INFO: [PFT_R..][epoch:  3, iter:   4,500, lr:(5.000e-06,)] [eta: 5 days, 10:07:41, time (data): 1.398 (0.000)] l_pix: 5.9494e-02 
+2025-10-13 12:27:45,370 INFO: Validation RGBNIR_val
+	 # psnr: 24.9200	Best: 24.9200 @ 4500 iter
+	 # ssim: 0.6687	Best: 0.6687 @ 4500 iter
+
+2025-10-13 12:30:05,160 INFO: [PFT_R..][epoch:  3, iter:   4,600, lr:(5.000e-06,)] [eta: 5 days, 10:27:33, time (data): 1.398 (0.000)] l_pix: 8.4076e-02 
+2025-10-13 12:32:24,972 INFO: [PFT_R..][epoch:  3, iter:   4,700, lr:(5.000e-06,)] [eta: 5 days, 10:19:56, time (data): 1.398 (0.000)] l_pix: 5.0090e-02 
+2025-10-13 12:34:44,912 INFO: [PFT_R..][epoch:  3, iter:   4,800, lr:(5.000e-06,)] [eta: 5 days, 10:12:41, time (data): 1.399 (0.000)] l_pix: 7.1214e-02 
+2025-10-13 12:37:04,765 INFO: [PFT_R..][epoch:  3, iter:   4,900, lr:(5.000e-06,)] [eta: 5 days, 10:05:32, time (data): 1.398 (0.000)] l_pix: 8.4977e-02 
+2025-10-13 12:39:24,648 INFO: [PFT_R..][epoch:  3, iter:   5,000, lr:(5.000e-06,)] [eta: 5 days, 9:58:37, time (data): 1.399 (0.000)] l_pix: 4.9321e-02 
+2025-10-13 12:39:24,648 INFO: Saving models and training states.
+2025-10-13 12:39:48,797 INFO: Validation RGBNIR_val
+	 # psnr: 24.9204	Best: 24.9204 @ 5000 iter
+	 # ssim: 0.6687	Best: 0.6687 @ 5000 iter
+
+2025-10-13 12:42:08,631 INFO: [PFT_R..][epoch:  4, iter:   5,100, lr:(5.000e-06,)] [eta: 5 days, 10:17:27, time (data): 1.397 (0.000)] l_pix: 6.8194e-02 
+2025-10-13 12:44:28,543 INFO: [PFT_R..][epoch:  4, iter:   5,200, lr:(5.000e-06,)] [eta: 5 days, 10:10:24, time (data): 1.398 (0.000)] l_pix: 5.6148e-02 
+2025-10-13 12:46:48,592 INFO: [PFT_R..][epoch:  4, iter:   5,300, lr:(5.000e-06,)] [eta: 5 days, 10:03:41, time (data): 1.400 (0.000)] l_pix: 7.1382e-02 
+2025-10-13 12:49:08,606 INFO: [PFT_R..][epoch:  4, iter:   5,400, lr:(5.000e-06,)] [eta: 5 days, 9:57:05, time (data): 1.400 (0.000)] l_pix: 7.8405e-02 
+2025-10-13 12:51:28,496 INFO: [PFT_R..][epoch:  4, iter:   5,500, lr:(5.000e-06,)] [eta: 5 days, 9:50:31, time (data): 1.399 (0.000)] l_pix: 7.8732e-02 
+2025-10-13 12:51:51,483 INFO: Validation RGBNIR_val
+	 # psnr: 24.9207	Best: 24.9207 @ 5500 iter
+	 # ssim: 0.6687	Best: 0.6687 @ 5500 iter
+
+2025-10-13 12:54:11,263 INFO: [PFT_R..][epoch:  4, iter:   5,600, lr:(5.000e-06,)] [eta: 5 days, 10:06:11, time (data): 1.398 (0.000)] l_pix: 7.7999e-02 
+2025-10-13 12:56:31,143 INFO: [PFT_R..][epoch:  4, iter:   5,700, lr:(5.000e-06,)] [eta: 5 days, 9:59:31, time (data): 1.399 (0.000)] l_pix: 5.0075e-02 
+2025-10-13 12:58:50,973 INFO: [PFT_R..][epoch:  4, iter:   5,800, lr:(5.000e-06,)] [eta: 5 days, 9:52:57, time (data): 1.399 (0.000)] l_pix: 4.9090e-02 
+2025-10-13 13:01:10,832 INFO: [PFT_R..][epoch:  4, iter:   5,900, lr:(5.000e-06,)] [eta: 5 days, 9:46:33, time (data): 1.399 (0.000)] l_pix: 6.3559e-02 
+2025-10-13 13:03:30,822 INFO: [PFT_R..][epoch:  4, iter:   6,000, lr:(5.000e-06,)] [eta: 5 days, 9:40:24, time (data): 1.399 (0.000)] l_pix: 8.2084e-02 
+2025-10-13 13:03:53,894 INFO: Validation RGBNIR_val
+	 # psnr: 24.9206	Best: 24.9207 @ 5500 iter
+	 # ssim: 0.6687	Best: 0.6687 @ 5500 iter
+
+2025-10-13 13:06:13,662 INFO: [PFT_R..][epoch:  4, iter:   6,100, lr:(5.000e-06,)] [eta: 5 days, 9:54:36, time (data): 1.399 (0.000)] l_pix: 6.4289e-02 
+2025-10-13 13:08:33,376 INFO: [PFT_R..][epoch:  4, iter:   6,200, lr:(5.000e-06,)] [eta: 5 days, 9:48:07, time (data): 1.398 (0.000)] l_pix: 4.3347e-02 
+2025-10-13 13:10:53,208 INFO: [PFT_R..][epoch:  5, iter:   6,300, lr:(5.000e-06,)] [eta: 5 days, 9:41:52, time (data): 1.399 (0.001)] l_pix: 5.3119e-02 
+2025-10-13 13:13:13,141 INFO: [PFT_R..][epoch:  5, iter:   6,400, lr:(5.000e-06,)] [eta: 5 days, 9:35:50, time (data): 1.399 (0.001)] l_pix: 5.8923e-02 
+2025-10-13 13:15:32,999 INFO: [PFT_R..][epoch:  5, iter:   6,500, lr:(5.000e-06,)] [eta: 5 days, 9:29:51, time (data): 1.398 (0.000)] l_pix: 6.5338e-02 
+2025-10-13 13:15:56,038 INFO: Validation RGBNIR_val
+	 # psnr: 24.9206	Best: 24.9207 @ 5500 iter
+	 # ssim: 0.6687	Best: 0.6687 @ 6500 iter
+
+2025-10-13 13:18:15,939 INFO: [PFT_R..][epoch:  5, iter:   6,600, lr:(5.000e-06,)] [eta: 5 days, 9:42:50, time (data): 1.399 (0.000)] l_pix: 5.0058e-02 
+2025-10-13 13:20:35,979 INFO: [PFT_R..][epoch:  5, iter:   6,700, lr:(5.000e-06,)] [eta: 5 days, 9:36:55, time (data): 1.400 (0.000)] l_pix: 5.4185e-02 
+2025-10-13 13:22:55,927 INFO: [PFT_R..][epoch:  5, iter:   6,800, lr:(5.000e-06,)] [eta: 5 days, 9:31:03, time (data): 1.399 (0.000)] l_pix: 4.9885e-02 
+2025-10-13 13:25:15,859 INFO: [PFT_R..][epoch:  5, iter:   6,900, lr:(5.000e-06,)] [eta: 5 days, 9:25:16, time (data): 1.400 (0.000)] l_pix: 6.3012e-02 
+2025-10-13 13:27:35,606 INFO: [PFT_R..][epoch:  5, iter:   7,000, lr:(5.000e-06,)] [eta: 5 days, 9:19:26, time (data): 1.398 (0.000)] l_pix: 6.1642e-02 
+2025-10-13 13:27:58,764 INFO: Validation RGBNIR_val
+	 # psnr: 24.9207	Best: 24.9207 @ 5500 iter
+	 # ssim: 0.6688	Best: 0.6688 @ 7000 iter
+
+2025-10-13 13:30:18,547 INFO: [PFT_R..][epoch:  5, iter:   7,100, lr:(5.000e-06,)] [eta: 5 days, 9:31:17, time (data): 1.399 (0.000)] l_pix: 4.8745e-02 
+2025-10-13 13:32:38,453 INFO: [PFT_R..][epoch:  5, iter:   7,200, lr:(5.000e-06,)] [eta: 5 days, 9:25:31, time (data): 1.399 (0.000)] l_pix: 6.1288e-02 
+2025-10-13 13:34:58,216 INFO: [PFT_R..][epoch:  5, iter:   7,300, lr:(5.000e-06,)] [eta: 5 days, 9:19:44, time (data): 1.398 (0.000)] l_pix: 5.7475e-02 
+2025-10-13 13:37:18,144 INFO: [PFT_R..][epoch:  5, iter:   7,400, lr:(5.000e-06,)] [eta: 5 days, 9:14:10, time (data): 1.399 (0.000)] l_pix: 8.3160e-02 
+2025-10-13 13:39:38,050 INFO: [PFT_R..][epoch:  5, iter:   7,500, lr:(5.000e-06,)] [eta: 5 days, 9:08:40, time (data): 1.399 (0.000)] l_pix: 6.5870e-02 
+2025-10-13 13:40:01,298 INFO: Validation RGBNIR_val
+	 # psnr: 24.9206	Best: 24.9207 @ 5500 iter
+	 # ssim: 0.6688	Best: 0.6688 @ 7500 iter
+
+2025-10-13 13:42:21,323 INFO: [PFT_R..][epoch:  6, iter:   7,600, lr:(5.000e-06,)] [eta: 5 days, 9:19:47, time (data): 1.400 (0.001)] l_pix: 7.7959e-02 
+2025-10-13 13:44:41,292 INFO: [PFT_R..][epoch:  6, iter:   7,700, lr:(5.000e-06,)] [eta: 5 days, 9:14:16, time (data): 1.399 (0.000)] l_pix: 6.7975e-02 
+2025-10-13 13:47:01,132 INFO: [PFT_R..][epoch:  6, iter:   7,800, lr:(5.000e-06,)] [eta: 5 days, 9:08:46, time (data): 1.399 (0.000)] l_pix: 4.9564e-02 
+2025-10-13 13:49:21,090 INFO: [PFT_R..][epoch:  6, iter:   7,900, lr:(5.000e-06,)] [eta: 5 days, 9:03:24, time (data): 1.400 (0.000)] l_pix: 3.8637e-02 
+2025-10-13 13:51:40,792 INFO: [PFT_R..][epoch:  6, iter:   8,000, lr:(5.000e-06,)] [eta: 5 days, 8:57:57, time (data): 1.398 (0.000)] l_pix: 5.1920e-02 
+2025-10-13 13:52:03,662 INFO: Validation RGBNIR_val
+	 # psnr: 24.9205	Best: 24.9207 @ 5500 iter
+	 # ssim: 0.6688	Best: 0.6688 @ 8000 iter
+
+2025-10-13 13:54:23,541 INFO: [PFT_R..][epoch:  6, iter:   8,100, lr:(5.000e-06,)] [eta: 5 days, 9:07:51, time (data): 1.399 (0.000)] l_pix: 6.3504e-02 
+2025-10-13 13:56:43,366 INFO: [PFT_R..][epoch:  6, iter:   8,200, lr:(5.000e-06,)] [eta: 5 days, 9:02:26, time (data): 1.398 (0.000)] l_pix: 6.9865e-02 
+2025-10-13 13:59:03,238 INFO: [PFT_R..][epoch:  6, iter:   8,300, lr:(5.000e-06,)] [eta: 5 days, 8:57:08, time (data): 1.398 (0.000)] l_pix: 6.0563e-02 
+2025-10-13 14:01:22,967 INFO: [PFT_R..][epoch:  6, iter:   8,400, lr:(5.000e-06,)] [eta: 5 days, 8:51:48, time (data): 1.397 (0.000)] l_pix: 6.1315e-02 
+2025-10-13 14:03:42,911 INFO: [PFT_R..][epoch:  6, iter:   8,500, lr:(5.000e-06,)] [eta: 5 days, 8:46:41, time (data): 1.401 (0.000)] l_pix: 5.4902e-02 
+2025-10-13 14:04:06,085 INFO: Validation RGBNIR_val
+	 # psnr: 24.9206	Best: 24.9207 @ 5500 iter
+	 # ssim: 0.6688	Best: 0.6688 @ 8000 iter
+
+2025-10-13 14:06:25,753 INFO: [PFT_R..][epoch:  6, iter:   8,600, lr:(5.000e-06,)] [eta: 5 days, 8:55:54, time (data): 1.398 (0.000)] l_pix: 5.8447e-02 
+2025-10-13 14:08:45,735 INFO: [PFT_R..][epoch:  6, iter:   8,700, lr:(5.000e-06,)] [eta: 5 days, 8:50:46, time (data): 1.399 (0.000)] l_pix: 5.1530e-02 
+2025-10-13 14:11:05,654 INFO: [PFT_R..][epoch:  7, iter:   8,800, lr:(5.000e-06,)] [eta: 5 days, 8:45:39, time (data): 1.399 (0.001)] l_pix: 6.4162e-02 
+2025-10-13 14:13:25,602 INFO: [PFT_R..][epoch:  7, iter:   8,900, lr:(5.000e-06,)] [eta: 5 days, 8:40:37, time (data): 1.399 (0.000)] l_pix: 6.0355e-02 
+2025-10-13 14:15:45,481 INFO: [PFT_R..][epoch:  7, iter:   9,000, lr:(5.000e-06,)] [eta: 5 days, 8:35:36, time (data): 1.399 (0.000)] l_pix: 8.4163e-02 
+2025-10-13 14:16:08,566 INFO: Validation RGBNIR_val
+	 # psnr: 24.9206	Best: 24.9207 @ 5500 iter
+	 # ssim: 0.6688	Best: 0.6688 @ 9000 iter
+
+2025-10-13 14:18:28,329 INFO: [PFT_R..][epoch:  7, iter:   9,100, lr:(5.000e-06,)] [eta: 5 days, 8:44:09, time (data): 1.399 (0.000)] l_pix: 5.0608e-02 
+2025-10-13 14:20:48,168 INFO: [PFT_R..][epoch:  7, iter:   9,200, lr:(5.000e-06,)] [eta: 5 days, 8:39:05, time (data): 1.399 (0.000)] l_pix: 6.0042e-02 
+2025-10-13 14:23:08,107 INFO: [PFT_R..][epoch:  7, iter:   9,300, lr:(5.000e-06,)] [eta: 5 days, 8:34:08, time (data): 1.401 (0.000)] l_pix: 6.6899e-02 
+2025-10-13 14:25:27,723 INFO: [PFT_R..][epoch:  7, iter:   9,400, lr:(5.000e-06,)] [eta: 5 days, 8:29:03, time (data): 1.398 (0.000)] l_pix: 6.5710e-02 
+2025-10-13 14:27:47,477 INFO: [PFT_R..][epoch:  7, iter:   9,500, lr:(5.000e-06,)] [eta: 5 days, 8:24:06, time (data): 1.397 (0.000)] l_pix: 5.8445e-02 
+2025-10-13 14:28:10,666 INFO: Validation RGBNIR_val
+	 # psnr: 24.9206	Best: 24.9207 @ 5500 iter
+	 # ssim: 0.6688	Best: 0.6688 @ 9500 iter
+
+2025-10-13 14:30:30,450 INFO: [PFT_R..][epoch:  7, iter:   9,600, lr:(5.000e-06,)] [eta: 5 days, 8:32:07, time (data): 1.398 (0.000)] l_pix: 7.7788e-02 
+2025-10-13 14:32:50,407 INFO: [PFT_R..][epoch:  7, iter:   9,700, lr:(5.000e-06,)] [eta: 5 days, 8:27:15, time (data): 1.399 (0.000)] l_pix: 6.2811e-02 
+2025-10-13 14:35:10,209 INFO: [PFT_R..][epoch:  7, iter:   9,800, lr:(5.000e-06,)] [eta: 5 days, 8:22:22, time (data): 1.398 (0.000)] l_pix: 5.4056e-02 
+2025-10-13 14:37:30,247 INFO: [PFT_R..][epoch:  7, iter:   9,900, lr:(5.000e-06,)] [eta: 5 days, 8:17:38, time (data): 1.400 (0.000)] l_pix: 5.9153e-02 
+2025-10-13 14:39:50,141 INFO: [PFT_R..][epoch:  7, iter:  10,000, lr:(5.000e-06,)] [eta: 5 days, 8:12:54, time (data): 1.399 (0.000)] l_pix: 5.7940e-02 
+2025-10-13 14:39:50,141 INFO: Saving models and training states.
+2025-10-13 14:40:14,473 INFO: Validation RGBNIR_val
+	 # psnr: 24.9206	Best: 24.9207 @ 5500 iter
+	 # ssim: 0.6688	Best: 0.6688 @ 10000 iter
+
+2025-10-13 14:42:34,229 INFO: [PFT_R..][epoch:  8, iter:  10,100, lr:(5.000e-06,)] [eta: 5 days, 8:20:58, time (data): 1.398 (0.000)] l_pix: 6.3755e-02 
+2025-10-13 14:44:54,123 INFO: [PFT_R..][epoch:  8, iter:  10,200, lr:(5.000e-06,)] [eta: 5 days, 8:16:11, time (data): 1.399 (0.000)] l_pix: 6.9246e-02 
+2025-10-13 14:47:14,128 INFO: [PFT_R..][epoch:  8, iter:  10,300, lr:(5.000e-06,)] [eta: 5 days, 8:11:30, time (data): 1.399 (0.000)] l_pix: 4.8500e-02 
+2025-10-13 14:49:33,941 INFO: [PFT_R..][epoch:  8, iter:  10,400, lr:(5.000e-06,)] [eta: 5 days, 8:06:47, time (data): 1.398 (0.000)] l_pix: 5.7772e-02 
+2025-10-13 14:51:53,828 INFO: [PFT_R..][epoch:  8, iter:  10,500, lr:(5.000e-06,)] [eta: 5 days, 8:02:08, time (data): 1.400 (0.000)] l_pix: 6.2000e-02 
+2025-10-13 14:52:16,690 INFO: Validation RGBNIR_val
+	 # psnr: 24.9208	Best: 24.9208 @ 10500 iter
+	 # ssim: 0.6688	Best: 0.6688 @ 10000 iter
+
+2025-10-13 14:54:36,278 INFO: [PFT_R..][epoch:  8, iter:  10,600, lr:(5.000e-06,)] [eta: 5 days, 8:08:51, time (data): 1.397 (0.000)] l_pix: 5.5469e-02 
+2025-10-13 14:56:56,043 INFO: [PFT_R..][epoch:  8, iter:  10,700, lr:(5.000e-06,)] [eta: 5 days, 8:04:07, time (data): 1.398 (0.000)] l_pix: 5.1806e-02 
+2025-10-13 14:59:15,810 INFO: [PFT_R..][epoch:  8, iter:  10,800, lr:(5.000e-06,)] [eta: 5 days, 7:59:26, time (data): 1.398 (0.000)] l_pix: 5.4706e-02 
+2025-10-13 15:01:35,667 INFO: [PFT_R..][epoch:  8, iter:  10,900, lr:(5.000e-06,)] [eta: 5 days, 7:54:50, time (data): 1.397 (0.000)] l_pix: 6.4454e-02 
+2025-10-13 15:03:55,502 INFO: [PFT_R..][epoch:  8, iter:  11,000, lr:(5.000e-06,)] [eta: 5 days, 7:50:16, time (data): 1.398 (0.000)] l_pix: 5.0081e-02 
+2025-10-13 15:04:18,686 INFO: Validation RGBNIR_val
+	 # psnr: 24.9205	Best: 24.9208 @ 10500 iter
+	 # ssim: 0.6688	Best: 0.6688 @ 10000 iter
+
+2025-10-13 15:06:38,543 INFO: [PFT_R..][epoch:  8, iter:  11,100, lr:(5.000e-06,)] [eta: 5 days, 7:56:51, time (data): 1.400 (0.000)] l_pix: 4.3966e-02 
+2025-10-13 15:08:58,471 INFO: [PFT_R..][epoch:  8, iter:  11,200, lr:(5.000e-06,)] [eta: 5 days, 7:52:19, time (data): 1.400 (0.000)] l_pix: 6.6838e-02 
+2025-10-13 15:11:18,479 INFO: [PFT_R..][epoch:  9, iter:  11,300, lr:(5.000e-06,)] [eta: 5 days, 7:47:50, time (data): 1.399 (0.000)] l_pix: 5.8315e-02 
+2025-10-13 15:13:38,380 INFO: [PFT_R..][epoch:  9, iter:  11,400, lr:(5.000e-06,)] [eta: 5 days, 7:43:21, time (data): 1.399 (0.000)] l_pix: 5.2498e-02 
+2025-10-13 15:15:57,951 INFO: [PFT_R..][epoch:  9, iter:  11,500, lr:(5.000e-06,)] [eta: 5 days, 7:38:46, time (data): 1.396 (0.000)] l_pix: 4.7419e-02 
+2025-10-13 15:16:20,953 INFO: Validation RGBNIR_val
+	 # psnr: 24.9206	Best: 24.9208 @ 10500 iter
+	 # ssim: 0.6688	Best: 0.6688 @ 11500 iter
+
+2025-10-13 15:18:40,657 INFO: [PFT_R..][epoch:  9, iter:  11,600, lr:(5.000e-06,)] [eta: 5 days, 7:44:47, time (data): 1.397 (0.000)] l_pix: 6.9529e-02 
+2025-10-13 15:21:00,460 INFO: [PFT_R..][epoch:  9, iter:  11,700, lr:(5.000e-06,)] [eta: 5 days, 7:40:17, time (data): 1.399 (0.000)] l_pix: 5.2389e-02 
+2025-10-13 15:23:20,369 INFO: [PFT_R..][epoch:  9, iter:  11,800, lr:(5.000e-06,)] [eta: 5 days, 7:35:51, time (data): 1.399 (0.000)] l_pix: 7.3440e-02 
+2025-10-13 15:25:40,202 INFO: [PFT_R..][epoch:  9, iter:  11,900, lr:(5.000e-06,)] [eta: 5 days, 7:31:26, time (data): 1.397 (0.000)] l_pix: 6.1244e-02 
+2025-10-13 15:28:00,125 INFO: [PFT_R..][epoch:  9, iter:  12,000, lr:(5.000e-06,)] [eta: 5 days, 7:27:05, time (data): 1.399 (0.000)] l_pix: 7.2683e-02 
+2025-10-13 15:28:23,310 INFO: Validation RGBNIR_val
+	 # psnr: 24.9207	Best: 24.9208 @ 10500 iter
+	 # ssim: 0.6688	Best: 0.6688 @ 11500 iter
+
+2025-10-13 15:30:42,956 INFO: [PFT_R..][epoch:  9, iter:  12,100, lr:(5.000e-06,)] [eta: 5 days, 7:32:48, time (data): 1.397 (0.000)] l_pix: 5.2701e-02 
+2025-10-13 15:33:02,853 INFO: [PFT_R..][epoch:  9, iter:  12,200, lr:(5.000e-06,)] [eta: 5 days, 7:28:25, time (data): 1.398 (0.000)] l_pix: 6.9474e-02 
+2025-10-13 15:35:22,831 INFO: [PFT_R..][epoch:  9, iter:  12,300, lr:(5.000e-06,)] [eta: 5 days, 7:24:06, time (data): 1.400 (0.000)] l_pix: 6.5087e-02 
+2025-10-13 15:37:42,793 INFO: [PFT_R..][epoch:  9, iter:  12,400, lr:(5.000e-06,)] [eta: 5 days, 7:19:49, time (data): 1.400 (0.000)] l_pix: 6.1966e-02 
+2025-10-13 15:40:02,783 INFO: [PFT_R..][epoch:  9, iter:  12,500, lr:(5.000e-06,)] [eta: 5 days, 7:15:35, time (data): 1.399 (0.000)] l_pix: 6.3681e-02 
+2025-10-13 15:40:26,089 INFO: Validation RGBNIR_val
+	 # psnr: 24.9208	Best: 24.9208 @ 10500 iter
+	 # ssim: 0.6688	Best: 0.6688 @ 12500 iter
+
+2025-10-13 15:42:45,970 INFO: [PFT_R..][epoch: 10, iter:  12,600, lr:(5.000e-06,)] [eta: 5 days, 7:21:06, time (data): 1.399 (0.001)] l_pix: 7.5022e-02 
+2025-10-13 15:45:05,877 INFO: [PFT_R..][epoch: 10, iter:  12,700, lr:(5.000e-06,)] [eta: 5 days, 7:16:49, time (data): 1.398 (0.000)] l_pix: 5.5820e-02 
+2025-10-13 15:47:25,685 INFO: [PFT_R..][epoch: 10, iter:  12,800, lr:(5.000e-06,)] [eta: 5 days, 7:12:30, time (data): 1.398 (0.000)] l_pix: 7.9195e-02 
+2025-10-13 15:49:45,394 INFO: [PFT_R..][epoch: 10, iter:  12,900, lr:(5.000e-06,)] [eta: 5 days, 7:08:11, time (data): 1.398 (0.000)] l_pix: 6.0538e-02 
+2025-10-13 15:52:05,312 INFO: [PFT_R..][epoch: 10, iter:  13,000, lr:(5.000e-06,)] [eta: 5 days, 7:03:59, time (data): 1.399 (0.000)] l_pix: 4.7040e-02 
+2025-10-13 15:52:28,268 INFO: Validation RGBNIR_val
+	 # psnr: 24.9213	Best: 24.9213 @ 13000 iter
+	 # ssim: 0.6688	Best: 0.6688 @ 13000 iter
+
+2025-10-13 15:54:48,177 INFO: [PFT_R..][epoch: 10, iter:  13,100, lr:(5.000e-06,)] [eta: 5 days, 7:09:04, time (data): 1.401 (0.000)] l_pix: 6.8340e-02 
+2025-10-13 15:57:08,040 INFO: [PFT_R..][epoch: 10, iter:  13,200, lr:(5.000e-06,)] [eta: 5 days, 7:04:49, time (data): 1.399 (0.000)] l_pix: 7.8750e-02 
+2025-10-13 15:59:27,757 INFO: [PFT_R..][epoch: 10, iter:  13,300, lr:(5.000e-06,)] [eta: 5 days, 7:00:33, time (data): 1.398 (0.000)] l_pix: 6.5416e-02 
+2025-10-13 16:01:47,628 INFO: [PFT_R..][epoch: 10, iter:  13,400, lr:(5.000e-06,)] [eta: 5 days, 6:56:22, time (data): 1.399 (0.000)] l_pix: 6.9411e-02 
+2025-10-13 16:04:07,489 INFO: [PFT_R..][epoch: 10, iter:  13,500, lr:(5.000e-06,)] [eta: 5 days, 6:52:13, time (data): 1.401 (0.000)] l_pix: 5.2196e-02 
+2025-10-13 16:04:30,694 INFO: Validation RGBNIR_val
+	 # psnr: 24.9218	Best: 24.9218 @ 13500 iter
+	 # ssim: 0.6688	Best: 0.6688 @ 13500 iter
+
+2025-10-13 16:06:50,388 INFO: [PFT_R..][epoch: 10, iter:  13,600, lr:(5.000e-06,)] [eta: 5 days, 6:57:01, time (data): 1.398 (0.000)] l_pix: 6.7675e-02 
+2025-10-13 16:09:10,286 INFO: [PFT_R..][epoch: 10, iter:  13,700, lr:(5.000e-06,)] [eta: 5 days, 6:52:52, time (data): 1.400 (0.000)] l_pix: 7.7242e-02 
+2025-10-13 16:11:30,264 INFO: [PFT_R..][epoch: 11, iter:  13,800, lr:(5.000e-06,)] [eta: 5 days, 6:48:46, time (data): 1.400 (0.001)] l_pix: 3.8000e-02 
+2025-10-13 16:13:50,147 INFO: [PFT_R..][epoch: 11, iter:  13,900, lr:(5.000e-06,)] [eta: 5 days, 6:44:39, time (data): 1.400 (0.000)] l_pix: 5.9589e-02 
+2025-10-13 16:16:09,908 INFO: [PFT_R..][epoch: 11, iter:  14,000, lr:(5.000e-06,)] [eta: 5 days, 6:40:31, time (data): 1.398 (0.000)] l_pix: 6.0746e-02 
+2025-10-13 16:16:32,791 INFO: Validation RGBNIR_val
+	 # psnr: 24.9217	Best: 24.9218 @ 13500 iter
+	 # ssim: 0.6688	Best: 0.6688 @ 14000 iter
+
+2025-10-13 16:18:52,498 INFO: [PFT_R..][epoch: 11, iter:  14,100, lr:(5.000e-06,)] [eta: 5 days, 6:44:56, time (data): 1.397 (0.000)] l_pix: 8.1600e-02 
+2025-10-13 16:21:12,322 INFO: [PFT_R..][epoch: 11, iter:  14,200, lr:(5.000e-06,)] [eta: 5 days, 6:40:49, time (data): 1.398 (0.000)] l_pix: 4.1335e-02 
+2025-10-13 16:23:32,053 INFO: [PFT_R..][epoch: 11, iter:  14,300, lr:(5.000e-06,)] [eta: 5 days, 6:36:41, time (data): 1.398 (0.000)] l_pix: 5.8255e-02 
+2025-10-13 16:25:51,929 INFO: [PFT_R..][epoch: 11, iter:  14,400, lr:(5.000e-06,)] [eta: 5 days, 6:32:38, time (data): 1.398 (0.000)] l_pix: 6.3947e-02 
+2025-10-13 16:28:11,844 INFO: [PFT_R..][epoch: 11, iter:  14,500, lr:(5.000e-06,)] [eta: 5 days, 6:28:38, time (data): 1.399 (0.000)] l_pix: 7.5281e-02 
+2025-10-13 16:28:34,915 INFO: Validation RGBNIR_val
+	 # psnr: 24.9217	Best: 24.9218 @ 13500 iter
+	 # ssim: 0.6688	Best: 0.6688 @ 14500 iter
+
+2025-10-13 16:30:54,643 INFO: [PFT_R..][epoch: 11, iter:  14,600, lr:(5.000e-06,)] [eta: 5 days, 6:32:53, time (data): 1.398 (0.000)] l_pix: 5.4392e-02 
+2025-10-13 16:33:14,493 INFO: [PFT_R..][epoch: 11, iter:  14,700, lr:(5.000e-06,)] [eta: 5 days, 6:28:50, time (data): 1.398 (0.000)] l_pix: 3.9165e-02 
+2025-10-13 16:35:34,331 INFO: [PFT_R..][epoch: 11, iter:  14,800, lr:(5.000e-06,)] [eta: 5 days, 6:24:48, time (data): 1.398 (0.000)] l_pix: 5.1195e-02 
+2025-10-13 16:37:54,138 INFO: [PFT_R..][epoch: 11, iter:  14,900, lr:(5.000e-06,)] [eta: 5 days, 6:20:47, time (data): 1.398 (0.000)] l_pix: 6.4305e-02 
+2025-10-13 16:40:14,112 INFO: [PFT_R..][epoch: 11, iter:  15,000, lr:(5.000e-06,)] [eta: 5 days, 6:16:50, time (data): 1.399 (0.000)] l_pix: 5.4969e-02 
+2025-10-13 16:40:14,112 INFO: Saving models and training states.
+2025-10-13 16:40:38,261 INFO: Validation RGBNIR_val
+	 # psnr: 24.9217	Best: 24.9218 @ 13500 iter
+	 # ssim: 0.6688	Best: 0.6688 @ 14500 iter
+
+2025-10-13 16:42:58,103 INFO: [PFT_R..][epoch: 12, iter:  15,100, lr:(5.000e-06,)] [eta: 5 days, 6:21:16, time (data): 1.397 (0.000)] l_pix: 7.2134e-02 
+2025-10-13 16:45:18,078 INFO: [PFT_R..][epoch: 12, iter:  15,200, lr:(5.000e-06,)] [eta: 5 days, 6:17:19, time (data): 1.399 (0.000)] l_pix: 6.0683e-02 
+2025-10-13 16:47:37,741 INFO: [PFT_R..][epoch: 12, iter:  15,300, lr:(5.000e-06,)] [eta: 5 days, 6:13:17, time (data): 1.393 (0.000)] l_pix: 6.0407e-02 
+2025-10-13 16:49:57,536 INFO: [PFT_R..][epoch: 12, iter:  15,400, lr:(5.000e-06,)] [eta: 5 days, 6:09:19, time (data): 1.397 (0.000)] l_pix: 6.0058e-02 
+2025-10-13 16:52:17,451 INFO: [PFT_R..][epoch: 12, iter:  15,500, lr:(5.000e-06,)] [eta: 5 days, 6:05:24, time (data): 1.402 (0.000)] l_pix: 6.2238e-02 
+2025-10-13 16:52:40,361 INFO: Validation RGBNIR_val
+	 # psnr: 24.9220	Best: 24.9220 @ 15500 iter
+	 # ssim: 0.6689	Best: 0.6689 @ 15500 iter
+
+2025-10-13 16:55:00,168 INFO: [PFT_R..][epoch: 12, iter:  15,600, lr:(5.000e-06,)] [eta: 5 days, 6:09:10, time (data): 1.399 (0.000)] l_pix: 5.9058e-02 
+2025-10-13 16:57:19,888 INFO: [PFT_R..][epoch: 12, iter:  15,700, lr:(5.000e-06,)] [eta: 5 days, 6:05:11, time (data): 1.399 (0.000)] l_pix: 5.6999e-02 
+2025-10-13 16:59:39,724 INFO: [PFT_R..][epoch: 12, iter:  15,800, lr:(5.000e-06,)] [eta: 5 days, 6:01:15, time (data): 1.398 (0.000)] l_pix: 5.5798e-02 
+2025-10-13 17:01:59,764 INFO: [PFT_R..][epoch: 12, iter:  15,900, lr:(5.000e-06,)] [eta: 5 days, 5:57:25, time (data): 1.397 (0.000)] l_pix: 5.2251e-02 
+2025-10-13 17:04:19,673 INFO: [PFT_R..][epoch: 12, iter:  16,000, lr:(5.000e-06,)] [eta: 5 days, 5:53:33, time (data): 1.399 (0.000)] l_pix: 4.6121e-02 
+2025-10-13 17:04:42,840 INFO: Validation RGBNIR_val
+	 # psnr: 24.9222	Best: 24.9222 @ 16000 iter
+	 # ssim: 0.6689	Best: 0.6689 @ 16000 iter
+
+2025-10-13 17:07:02,728 INFO: [PFT_R..][epoch: 12, iter:  16,100, lr:(5.000e-06,)] [eta: 5 days, 5:57:14, time (data): 1.398 (0.000)] l_pix: 5.3020e-02 
+2025-10-13 17:09:22,631 INFO: [PFT_R..][epoch: 12, iter:  16,200, lr:(5.000e-06,)] [eta: 5 days, 5:53:21, time (data): 1.399 (0.000)] l_pix: 6.1822e-02 
+2025-10-13 17:11:42,592 INFO: [PFT_R..][epoch: 13, iter:  16,300, lr:(5.000e-06,)] [eta: 5 days, 5:49:31, time (data): 1.398 (0.000)] l_pix: 6.3825e-02 
+2025-10-13 17:14:02,402 INFO: [PFT_R..][epoch: 13, iter:  16,400, lr:(5.000e-06,)] [eta: 5 days, 5:45:39, time (data): 1.398 (0.000)] l_pix: 5.3070e-02 
+2025-10-13 17:16:22,266 INFO: [PFT_R..][epoch: 13, iter:  16,500, lr:(5.000e-06,)] [eta: 5 days, 5:41:49, time (data): 1.397 (0.000)] l_pix: 7.4678e-02 
+2025-10-13 17:16:45,241 INFO: Validation RGBNIR_val
+	 # psnr: 24.9221	Best: 24.9222 @ 16000 iter
+	 # ssim: 0.6688	Best: 0.6689 @ 16000 iter
+
+2025-10-13 17:19:05,058 INFO: [PFT_R..][epoch: 13, iter:  16,600, lr:(5.000e-06,)] [eta: 5 days, 5:45:13, time (data): 1.398 (0.000)] l_pix: 6.9153e-02 
+2025-10-13 17:21:25,054 INFO: [PFT_R..][epoch: 13, iter:  16,700, lr:(5.000e-06,)] [eta: 5 days, 5:41:25, time (data): 1.402 (0.000)] l_pix: 7.5508e-02 
+2025-10-13 17:23:44,880 INFO: [PFT_R..][epoch: 13, iter:  16,800, lr:(5.000e-06,)] [eta: 5 days, 5:37:35, time (data): 1.399 (0.000)] l_pix: 3.8576e-02 
+2025-10-13 17:26:04,727 INFO: [PFT_R..][epoch: 13, iter:  16,900, lr:(5.000e-06,)] [eta: 5 days, 5:33:46, time (data): 1.396 (0.000)] l_pix: 5.4781e-02 
+2025-10-13 17:28:24,511 INFO: [PFT_R..][epoch: 13, iter:  17,000, lr:(5.000e-06,)] [eta: 5 days, 5:29:57, time (data): 1.398 (0.000)] l_pix: 5.8518e-02 
+2025-10-13 17:28:47,662 INFO: Validation RGBNIR_val
+	 # psnr: 24.9223	Best: 24.9223 @ 17000 iter
+	 # ssim: 0.6688	Best: 0.6689 @ 16000 iter
+
+2025-10-13 17:31:07,365 INFO: [PFT_R..][epoch: 13, iter:  17,100, lr:(5.000e-06,)] [eta: 5 days, 5:33:11, time (data): 1.400 (0.000)] l_pix: 5.6894e-02 
+2025-10-13 17:33:27,247 INFO: [PFT_R..][epoch: 13, iter:  17,200, lr:(5.000e-06,)] [eta: 5 days, 5:29:24, time (data): 1.399 (0.000)] l_pix: 5.3493e-02 
+2025-10-13 17:35:47,102 INFO: [PFT_R..][epoch: 13, iter:  17,300, lr:(5.000e-06,)] [eta: 5 days, 5:25:37, time (data): 1.398 (0.000)] l_pix: 6.2241e-02 
+2025-10-13 17:38:07,097 INFO: [PFT_R..][epoch: 13, iter:  17,400, lr:(5.000e-06,)] [eta: 5 days, 5:21:53, time (data): 1.400 (0.000)] l_pix: 6.0235e-02 
+2025-10-13 17:40:26,908 INFO: [PFT_R..][epoch: 13, iter:  17,500, lr:(5.000e-06,)] [eta: 5 days, 5:18:07, time (data): 1.394 (0.000)] l_pix: 5.8323e-02 
+2025-10-13 17:40:50,126 INFO: Validation RGBNIR_val
+	 # psnr: 24.9227	Best: 24.9227 @ 17500 iter
+	 # ssim: 0.6688	Best: 0.6689 @ 16000 iter
+
+2025-10-13 17:43:09,877 INFO: [PFT_R..][epoch: 14, iter:  17,600, lr:(5.000e-06,)] [eta: 5 days, 5:21:14, time (data): 1.397 (0.001)] l_pix: 6.2788e-02 
+2025-10-13 17:45:29,591 INFO: [PFT_R..][epoch: 14, iter:  17,700, lr:(5.000e-06,)] [eta: 5 days, 5:17:25, time (data): 1.393 (0.000)] l_pix: 4.9160e-02 
+2025-10-13 17:47:49,634 INFO: [PFT_R..][epoch: 14, iter:  17,800, lr:(5.000e-06,)] [eta: 5 days, 5:13:44, time (data): 1.400 (0.000)] l_pix: 7.6858e-02 
+2025-10-13 17:50:09,414 INFO: [PFT_R..][epoch: 14, iter:  17,900, lr:(5.000e-06,)] [eta: 5 days, 5:09:59, time (data): 1.400 (0.001)] l_pix: 7.9526e-02 
+2025-10-13 17:52:29,315 INFO: [PFT_R..][epoch: 14, iter:  18,000, lr:(5.000e-06,)] [eta: 5 days, 5:06:17, time (data): 1.399 (0.000)] l_pix: 6.7483e-02 
+2025-10-13 17:52:52,267 INFO: Validation RGBNIR_val
+	 # psnr: 24.9226	Best: 24.9227 @ 17500 iter
+	 # ssim: 0.6688	Best: 0.6689 @ 16000 iter
+
+2025-10-13 17:55:12,106 INFO: [PFT_R..][epoch: 14, iter:  18,100, lr:(5.000e-06,)] [eta: 5 days, 5:09:11, time (data): 1.401 (0.000)] l_pix: 5.5545e-02 
+2025-10-13 17:57:31,806 INFO: [PFT_R..][epoch: 14, iter:  18,200, lr:(5.000e-06,)] [eta: 5 days, 5:05:25, time (data): 1.397 (0.000)] l_pix: 5.9569e-02 
+2025-10-13 17:59:51,532 INFO: [PFT_R..][epoch: 14, iter:  18,300, lr:(5.000e-06,)] [eta: 5 days, 5:01:40, time (data): 1.397 (0.000)] l_pix: 7.4832e-02 
+2025-10-13 18:02:11,290 INFO: [PFT_R..][epoch: 14, iter:  18,400, lr:(5.000e-06,)] [eta: 5 days, 4:57:57, time (data): 1.398 (0.000)] l_pix: 5.8348e-02 
+2025-10-13 18:04:31,177 INFO: [PFT_R..][epoch: 14, iter:  18,500, lr:(5.000e-06,)] [eta: 5 days, 4:54:17, time (data): 1.398 (0.000)] l_pix: 7.1056e-02 
+2025-10-13 18:04:54,252 INFO: Validation RGBNIR_val
+	 # psnr: 24.9223	Best: 24.9227 @ 17500 iter
+	 # ssim: 0.6688	Best: 0.6689 @ 16000 iter
+
+2025-10-13 18:07:14,055 INFO: [PFT_R..][epoch: 14, iter:  18,600, lr:(5.000e-06,)] [eta: 5 days, 4:57:03, time (data): 1.398 (0.001)] l_pix: 4.5541e-02 
+2025-10-13 18:09:34,054 INFO: [PFT_R..][epoch: 14, iter:  18,700, lr:(5.000e-06,)] [eta: 5 days, 4:53:24, time (data): 1.404 (0.000)] l_pix: 6.2002e-02 
+2025-10-13 18:11:54,039 INFO: [PFT_R..][epoch: 15, iter:  18,800, lr:(5.000e-06,)] [eta: 5 days, 4:49:46, time (data): 1.400 (0.001)] l_pix: 5.6062e-02 
+2025-10-13 18:14:13,747 INFO: [PFT_R..][epoch: 15, iter:  18,900, lr:(5.000e-06,)] [eta: 5 days, 4:46:05, time (data): 1.388 (0.000)] l_pix: 3.7623e-02 
+2025-10-13 18:16:33,434 INFO: [PFT_R..][epoch: 15, iter:  19,000, lr:(5.000e-06,)] [eta: 5 days, 4:42:23, time (data): 1.396 (0.000)] l_pix: 5.7045e-02 
+2025-10-13 18:16:56,479 INFO: Validation RGBNIR_val
+	 # psnr: 24.9222	Best: 24.9227 @ 17500 iter
+	 # ssim: 0.6688	Best: 0.6689 @ 16000 iter
+
+2025-10-13 18:19:16,348 INFO: [PFT_R..][epoch: 15, iter:  19,100, lr:(5.000e-06,)] [eta: 5 days, 4:45:01, time (data): 1.402 (0.000)] l_pix: 6.2748e-02 
+2025-10-13 18:21:36,076 INFO: [PFT_R..][epoch: 15, iter:  19,200, lr:(5.000e-06,)] [eta: 5 days, 4:41:20, time (data): 1.397 (0.000)] l_pix: 5.8997e-02 
+2025-10-13 18:23:56,012 INFO: [PFT_R..][epoch: 15, iter:  19,300, lr:(5.000e-06,)] [eta: 5 days, 4:37:43, time (data): 1.398 (0.000)] l_pix: 6.1987e-02 
+2025-10-13 18:26:15,889 INFO: [PFT_R..][epoch: 15, iter:  19,400, lr:(5.000e-06,)] [eta: 5 days, 4:34:07, time (data): 1.399 (0.000)] l_pix: 5.6825e-02 
+2025-10-13 18:28:35,610 INFO: [PFT_R..][epoch: 15, iter:  19,500, lr:(5.000e-06,)] [eta: 5 days, 4:30:28, time (data): 1.399 (0.000)] l_pix: 4.8044e-02 
+2025-10-13 18:28:58,779 INFO: Validation RGBNIR_val
+	 # psnr: 24.9222	Best: 24.9227 @ 17500 iter
+	 # ssim: 0.6689	Best: 0.6689 @ 19500 iter
+
+2025-10-13 18:31:18,592 INFO: [PFT_R..][epoch: 15, iter:  19,600, lr:(5.000e-06,)] [eta: 5 days, 4:32:59, time (data): 1.398 (0.000)] l_pix: 6.8910e-02 
+2025-10-13 18:33:38,289 INFO: [PFT_R..][epoch: 15, iter:  19,700, lr:(5.000e-06,)] [eta: 5 days, 4:29:19, time (data): 1.394 (0.000)] l_pix: 5.5570e-02 
+2025-10-13 18:35:58,133 INFO: [PFT_R..][epoch: 15, iter:  19,800, lr:(5.000e-06,)] [eta: 5 days, 4:25:43, time (data): 1.398 (0.000)] l_pix: 7.3124e-02 
+2025-10-13 18:38:17,943 INFO: [PFT_R..][epoch: 15, iter:  19,900, lr:(5.000e-06,)] [eta: 5 days, 4:22:07, time (data): 1.406 (0.000)] l_pix: 5.9838e-02 
+2025-10-13 18:40:37,901 INFO: [PFT_R..][epoch: 15, iter:  20,000, lr:(5.000e-06,)] [eta: 5 days, 4:18:34, time (data): 1.400 (0.000)] l_pix: 4.7984e-02 
+2025-10-13 18:40:37,901 INFO: Saving models and training states.
+2025-10-13 18:41:02,276 INFO: Validation RGBNIR_val
+	 # psnr: 24.9225	Best: 24.9227 @ 17500 iter
+	 # ssim: 0.6689	Best: 0.6689 @ 20000 iter
+
+2025-10-13 18:43:21,935 INFO: [PFT_R..][epoch: 16, iter:  20,100, lr:(5.000e-06,)] [eta: 5 days, 4:21:13, time (data): 1.398 (0.001)] l_pix: 6.6753e-02 
+2025-10-13 18:45:41,826 INFO: [PFT_R..][epoch: 16, iter:  20,200, lr:(5.000e-06,)] [eta: 5 days, 4:17:38, time (data): 1.399 (0.000)] l_pix: 8.2062e-02 
+2025-10-13 18:48:01,547 INFO: [PFT_R..][epoch: 16, iter:  20,300, lr:(5.000e-06,)] [eta: 5 days, 4:14:02, time (data): 1.398 (0.000)] l_pix: 5.1791e-02 
+2025-10-13 18:50:21,459 INFO: [PFT_R..][epoch: 16, iter:  20,400, lr:(5.000e-06,)] [eta: 5 days, 4:10:29, time (data): 1.399 (0.000)] l_pix: 5.2462e-02 
+2025-10-13 18:52:41,380 INFO: [PFT_R..][epoch: 16, iter:  20,500, lr:(5.000e-06,)] [eta: 5 days, 4:06:58, time (data): 1.399 (0.000)] l_pix: 7.3718e-02 
+2025-10-13 18:53:04,162 INFO: Validation RGBNIR_val
+	 # psnr: 24.9232	Best: 24.9232 @ 20500 iter
+	 # ssim: 0.6689	Best: 0.6689 @ 20500 iter
+
+2025-10-13 18:55:23,886 INFO: [PFT_R..][epoch: 16, iter:  20,600, lr:(5.000e-06,)] [eta: 5 days, 4:09:06, time (data): 1.397 (0.000)] l_pix: 6.1773e-02 
+2025-10-13 18:57:43,836 INFO: [PFT_R..][epoch: 16, iter:  20,700, lr:(5.000e-06,)] [eta: 5 days, 4:05:34, time (data): 1.398 (0.000)] l_pix: 7.6364e-02 
+2025-10-13 19:00:03,576 INFO: [PFT_R..][epoch: 16, iter:  20,800, lr:(5.000e-06,)] [eta: 5 days, 4:02:00, time (data): 1.398 (0.000)] l_pix: 6.1804e-02 
+2025-10-13 19:02:23,332 INFO: [PFT_R..][epoch: 16, iter:  20,900, lr:(5.000e-06,)] [eta: 5 days, 3:58:26, time (data): 1.398 (0.000)] l_pix: 4.7311e-02 
+2025-10-13 19:04:43,270 INFO: [PFT_R..][epoch: 16, iter:  21,000, lr:(5.000e-06,)] [eta: 5 days, 3:54:56, time (data): 1.399 (0.000)] l_pix: 4.9899e-02 
+2025-10-13 19:05:06,366 INFO: Validation RGBNIR_val
+	 # psnr: 24.9231	Best: 24.9232 @ 20500 iter
+	 # ssim: 0.6689	Best: 0.6689 @ 21000 iter
+
+2025-10-13 19:07:26,126 INFO: [PFT_R..][epoch: 16, iter:  21,100, lr:(5.000e-06,)] [eta: 5 days, 3:57:03, time (data): 1.398 (0.000)] l_pix: 5.5718e-02 
+2025-10-13 19:09:45,936 INFO: [PFT_R..][epoch: 16, iter:  21,200, lr:(5.000e-06,)] [eta: 5 days, 3:53:31, time (data): 1.398 (0.000)] l_pix: 6.3498e-02 
+2025-10-13 19:12:05,942 INFO: [PFT_R..][epoch: 17, iter:  21,300, lr:(5.000e-06,)] [eta: 5 days, 3:50:02, time (data): 1.399 (0.001)] l_pix: 5.3504e-02 
+2025-10-13 19:14:25,513 INFO: [PFT_R..][epoch: 17, iter:  21,400, lr:(5.000e-06,)] [eta: 5 days, 3:46:28, time (data): 1.396 (0.000)] l_pix: 6.0157e-02 
+2025-10-13 19:16:45,347 INFO: [PFT_R..][epoch: 17, iter:  21,500, lr:(5.000e-06,)] [eta: 5 days, 3:42:58, time (data): 1.397 (0.000)] l_pix: 8.1761e-02 
+2025-10-13 19:17:08,450 INFO: Validation RGBNIR_val
+	 # psnr: 24.9234	Best: 24.9234 @ 21500 iter
+	 # ssim: 0.6689	Best: 0.6689 @ 21500 iter
+
+2025-10-13 19:19:28,285 INFO: [PFT_R..][epoch: 17, iter:  21,600, lr:(5.000e-06,)] [eta: 5 days, 3:44:59, time (data): 1.399 (0.000)] l_pix: 5.5364e-02 
+2025-10-13 19:21:48,117 INFO: [PFT_R..][epoch: 17, iter:  21,700, lr:(5.000e-06,)] [eta: 5 days, 3:41:29, time (data): 1.398 (0.000)] l_pix: 6.4410e-02 
+2025-10-13 19:24:07,941 INFO: [PFT_R..][epoch: 17, iter:  21,800, lr:(5.000e-06,)] [eta: 5 days, 3:37:59, time (data): 1.398 (0.000)] l_pix: 7.3739e-02 
+2025-10-13 19:26:27,950 INFO: [PFT_R..][epoch: 17, iter:  21,900, lr:(5.000e-06,)] [eta: 5 days, 3:34:33, time (data): 1.399 (0.000)] l_pix: 7.6777e-02 
+2025-10-13 19:28:47,835 INFO: [PFT_R..][epoch: 17, iter:  22,000, lr:(5.000e-06,)] [eta: 5 days, 3:31:05, time (data): 1.399 (0.000)] l_pix: 5.9451e-02 
+2025-10-13 19:29:10,934 INFO: Validation RGBNIR_val
+	 # psnr: 24.9238	Best: 24.9238 @ 22000 iter
+	 # ssim: 0.6689	Best: 0.6689 @ 22000 iter
+
+2025-10-13 19:31:30,624 INFO: [PFT_R..][epoch: 17, iter:  22,100, lr:(5.000e-06,)] [eta: 5 days, 3:32:57, time (data): 1.398 (0.000)] l_pix: 7.3248e-02 
+2025-10-13 19:33:50,443 INFO: [PFT_R..][epoch: 17, iter:  22,200, lr:(5.000e-06,)] [eta: 5 days, 3:29:29, time (data): 1.399 (0.000)] l_pix: 7.9622e-02 
+2025-10-13 19:36:10,227 INFO: [PFT_R..][epoch: 17, iter:  22,300, lr:(5.000e-06,)] [eta: 5 days, 3:26:00, time (data): 1.398 (0.000)] l_pix: 5.1457e-02 
+2025-10-13 19:38:29,953 INFO: [PFT_R..][epoch: 17, iter:  22,400, lr:(5.000e-06,)] [eta: 5 days, 3:22:31, time (data): 1.397 (0.000)] l_pix: 6.9281e-02 
+2025-10-13 19:40:49,739 INFO: [PFT_R..][epoch: 17, iter:  22,500, lr:(5.000e-06,)] [eta: 5 days, 3:19:04, time (data): 1.398 (0.000)] l_pix: 6.9921e-02 
+2025-10-13 19:41:12,909 INFO: Validation RGBNIR_val
+	 # psnr: 24.9240	Best: 24.9240 @ 22500 iter
+	 # ssim: 0.6689	Best: 0.6689 @ 22000 iter
+
+2025-10-13 19:43:32,737 INFO: [PFT_R..][epoch: 18, iter:  22,600, lr:(5.000e-06,)] [eta: 5 days, 3:20:53, time (data): 1.399 (0.000)] l_pix: 7.9700e-02 
+2025-10-13 19:45:52,716 INFO: [PFT_R..][epoch: 18, iter:  22,700, lr:(5.000e-06,)] [eta: 5 days, 3:17:28, time (data): 1.399 (0.000)] l_pix: 4.9424e-02 
+2025-10-13 19:48:12,548 INFO: [PFT_R..][epoch: 18, iter:  22,800, lr:(5.000e-06,)] [eta: 5 days, 3:14:01, time (data): 1.398 (0.000)] l_pix: 7.9281e-02 
+2025-10-13 19:50:32,340 INFO: [PFT_R..][epoch: 18, iter:  22,900, lr:(5.000e-06,)] [eta: 5 days, 3:10:35, time (data): 1.398 (0.000)] l_pix: 4.6923e-02 
+2025-10-13 19:52:52,215 INFO: [PFT_R..][epoch: 18, iter:  23,000, lr:(5.000e-06,)] [eta: 5 days, 3:07:10, time (data): 1.399 (0.000)] l_pix: 5.8160e-02 
+2025-10-13 19:53:14,973 INFO: Validation RGBNIR_val
+	 # psnr: 24.9243	Best: 24.9243 @ 23000 iter
+	 # ssim: 0.6689	Best: 0.6689 @ 23000 iter
+
+2025-10-13 19:55:34,636 INFO: [PFT_R..][epoch: 18, iter:  23,100, lr:(5.000e-06,)] [eta: 5 days, 3:08:45, time (data): 1.398 (0.000)] l_pix: 5.6982e-02 
+2025-10-13 19:57:54,295 INFO: [PFT_R..][epoch: 18, iter:  23,200, lr:(5.000e-06,)] [eta: 5 days, 3:05:18, time (data): 1.397 (0.000)] l_pix: 6.9378e-02 
+2025-10-13 20:00:14,149 INFO: [PFT_R..][epoch: 18, iter:  23,300, lr:(5.000e-06,)] [eta: 5 days, 3:01:53, time (data): 1.398 (0.000)] l_pix: 6.5703e-02 
+2025-10-13 20:02:33,988 INFO: [PFT_R..][epoch: 18, iter:  23,400, lr:(5.000e-06,)] [eta: 5 days, 2:58:29, time (data): 1.399 (0.000)] l_pix: 7.4051e-02 
+2025-10-13 20:04:53,876 INFO: [PFT_R..][epoch: 18, iter:  23,500, lr:(5.000e-06,)] [eta: 5 days, 2:55:05, time (data): 1.399 (0.000)] l_pix: 6.9392e-02 
+2025-10-13 20:05:16,964 INFO: Validation RGBNIR_val
+	 # psnr: 24.9243	Best: 24.9243 @ 23000 iter
+	 # ssim: 0.6689	Best: 0.6689 @ 23000 iter
+
+2025-10-13 20:07:36,610 INFO: [PFT_R..][epoch: 18, iter:  23,600, lr:(5.000e-06,)] [eta: 5 days, 2:56:39, time (data): 1.396 (0.000)] l_pix: 7.1838e-02 
+2025-10-13 20:09:56,472 INFO: [PFT_R..][epoch: 18, iter:  23,700, lr:(5.000e-06,)] [eta: 5 days, 2:53:16, time (data): 1.397 (0.000)] l_pix: 6.7727e-02 
+2025-10-13 20:12:16,246 INFO: [PFT_R..][epoch: 19, iter:  23,800, lr:(5.000e-06,)] [eta: 5 days, 2:49:51, time (data): 1.398 (0.001)] l_pix: 5.8291e-02 
+2025-10-13 20:14:35,962 INFO: [PFT_R..][epoch: 19, iter:  23,900, lr:(5.000e-06,)] [eta: 5 days, 2:46:27, time (data): 1.397 (0.001)] l_pix: 5.4868e-02 
+2025-10-13 20:16:55,624 INFO: [PFT_R..][epoch: 19, iter:  24,000, lr:(5.000e-06,)] [eta: 5 days, 2:43:02, time (data): 1.397 (0.000)] l_pix: 5.2450e-02 
+2025-10-13 20:17:18,538 INFO: Validation RGBNIR_val
+	 # psnr: 24.9243	Best: 24.9243 @ 23000 iter
+	 # ssim: 0.6689	Best: 0.6689 @ 23000 iter
+
+2025-10-13 20:19:38,255 INFO: [PFT_R..][epoch: 19, iter:  24,100, lr:(5.000e-06,)] [eta: 5 days, 2:44:29, time (data): 1.397 (0.000)] l_pix: 5.4659e-02 
+2025-10-13 20:21:58,087 INFO: [PFT_R..][epoch: 19, iter:  24,200, lr:(5.000e-06,)] [eta: 5 days, 2:41:07, time (data): 1.399 (0.000)] l_pix: 4.3761e-02 
+2025-10-13 20:24:17,923 INFO: [PFT_R..][epoch: 19, iter:  24,300, lr:(5.000e-06,)] [eta: 5 days, 2:37:44, time (data): 1.398 (0.000)] l_pix: 7.5949e-02 
+2025-10-13 20:26:37,635 INFO: [PFT_R..][epoch: 19, iter:  24,400, lr:(5.000e-06,)] [eta: 5 days, 2:34:21, time (data): 1.398 (0.000)] l_pix: 4.8156e-02 
+2025-10-13 20:28:57,530 INFO: [PFT_R..][epoch: 19, iter:  24,500, lr:(5.000e-06,)] [eta: 5 days, 2:31:01, time (data): 1.398 (0.000)] l_pix: 6.3347e-02 
+2025-10-13 20:29:20,625 INFO: Validation RGBNIR_val
+	 # psnr: 24.9244	Best: 24.9244 @ 24500 iter
+	 # ssim: 0.6689	Best: 0.6689 @ 23000 iter
+
+2025-10-13 20:31:40,546 INFO: [PFT_R..][epoch: 19, iter:  24,600, lr:(5.000e-06,)] [eta: 5 days, 2:32:28, time (data): 1.400 (0.000)] l_pix: 4.5411e-02 
+2025-10-13 20:34:00,541 INFO: [PFT_R..][epoch: 19, iter:  24,700, lr:(5.000e-06,)] [eta: 5 days, 2:29:08, time (data): 1.400 (0.000)] l_pix: 7.2848e-02 
+2025-10-13 20:36:20,426 INFO: [PFT_R..][epoch: 19, iter:  24,800, lr:(5.000e-06,)] [eta: 5 days, 2:25:48, time (data): 1.399 (0.000)] l_pix: 5.8277e-02 
+2025-10-13 20:38:40,296 INFO: [PFT_R..][epoch: 19, iter:  24,900, lr:(5.000e-06,)] [eta: 5 days, 2:22:28, time (data): 1.399 (0.000)] l_pix: 6.7813e-02 
+2025-10-13 20:41:00,003 INFO: [PFT_R..][epoch: 19, iter:  25,000, lr:(5.000e-06,)] [eta: 5 days, 2:19:06, time (data): 1.398 (0.000)] l_pix: 6.1314e-02 
+2025-10-13 20:41:00,003 INFO: Saving models and training states.
+2025-10-13 20:41:24,220 INFO: Validation RGBNIR_val
+	 # psnr: 24.9249	Best: 24.9249 @ 25000 iter
+	 # ssim: 0.6690	Best: 0.6690 @ 25000 iter
+
+2025-10-13 20:43:43,901 INFO: [PFT_R..][epoch: 20, iter:  25,100, lr:(5.000e-06,)] [eta: 5 days, 2:20:39, time (data): 1.397 (0.001)] l_pix: 3.3735e-02 
+2025-10-13 20:46:03,647 INFO: [PFT_R..][epoch: 20, iter:  25,200, lr:(5.000e-06,)] [eta: 5 days, 2:17:17, time (data): 1.396 (0.000)] l_pix: 5.8670e-02 
+2025-10-13 20:48:23,509 INFO: [PFT_R..][epoch: 20, iter:  25,300, lr:(5.000e-06,)] [eta: 5 days, 2:13:58, time (data): 1.398 (0.000)] l_pix: 7.0353e-02 
+2025-10-13 20:50:43,376 INFO: [PFT_R..][epoch: 20, iter:  25,400, lr:(5.000e-06,)] [eta: 5 days, 2:10:39, time (data): 1.398 (0.000)] l_pix: 6.6743e-02 
+2025-10-13 20:53:03,093 INFO: [PFT_R..][epoch: 20, iter:  25,500, lr:(5.000e-06,)] [eta: 5 days, 2:07:19, time (data): 1.397 (0.000)] l_pix: 5.6066e-02 
+2025-10-13 20:53:25,931 INFO: Validation RGBNIR_val
+	 # psnr: 24.9252	Best: 24.9252 @ 25500 iter
+	 # ssim: 0.6689	Best: 0.6690 @ 25000 iter
+
+2025-10-13 20:55:45,531 INFO: [PFT_R..][epoch: 20, iter:  25,600, lr:(5.000e-06,)] [eta: 5 days, 2:08:29, time (data): 1.396 (0.000)] l_pix: 5.9679e-02 
+2025-10-13 20:58:05,344 INFO: [PFT_R..][epoch: 20, iter:  25,700, lr:(5.000e-06,)] [eta: 5 days, 2:05:10, time (data): 1.397 (0.000)] l_pix: 6.8419e-02 
+2025-10-13 21:00:25,130 INFO: [PFT_R..][epoch: 20, iter:  25,800, lr:(5.000e-06,)] [eta: 5 days, 2:01:50, time (data): 1.399 (0.000)] l_pix: 3.8604e-02 
+2025-10-13 21:02:44,990 INFO: [PFT_R..][epoch: 20, iter:  25,900, lr:(5.000e-06,)] [eta: 5 days, 1:58:32, time (data): 1.399 (0.000)] l_pix: 5.3794e-02 
+2025-10-13 21:05:04,825 INFO: [PFT_R..][epoch: 20, iter:  26,000, lr:(5.000e-06,)] [eta: 5 days, 1:55:15, time (data): 1.399 (0.000)] l_pix: 6.1432e-02 
+2025-10-13 21:05:27,981 INFO: Validation RGBNIR_val
+	 # psnr: 24.9252	Best: 24.9252 @ 26000 iter
+	 # ssim: 0.6689	Best: 0.6690 @ 25000 iter
+
+2025-10-13 21:07:47,856 INFO: [PFT_R..][epoch: 20, iter:  26,100, lr:(5.000e-06,)] [eta: 5 days, 1:56:27, time (data): 1.399 (0.000)] l_pix: 5.5270e-02 
+2025-10-13 21:10:07,730 INFO: [PFT_R..][epoch: 20, iter:  26,200, lr:(5.000e-06,)] [eta: 5 days, 1:53:10, time (data): 1.399 (0.000)] l_pix: 5.9338e-02 
+2025-10-13 21:12:27,648 INFO: [PFT_R..][epoch: 21, iter:  26,300, lr:(5.000e-06,)] [eta: 5 days, 1:49:53, time (data): 1.399 (0.001)] l_pix: 5.1069e-02 
+2025-10-13 21:14:47,640 INFO: [PFT_R..][epoch: 21, iter:  26,400, lr:(5.000e-06,)] [eta: 5 days, 1:46:38, time (data): 1.399 (0.000)] l_pix: 4.2797e-02 
+2025-10-13 21:17:07,578 INFO: [PFT_R..][epoch: 21, iter:  26,500, lr:(5.000e-06,)] [eta: 5 days, 1:43:22, time (data): 1.399 (0.000)] l_pix: 7.1920e-02 
+2025-10-13 21:17:30,546 INFO: Validation RGBNIR_val
+	 # psnr: 24.9254	Best: 24.9254 @ 26500 iter
+	 # ssim: 0.6689	Best: 0.6690 @ 25000 iter
+
+2025-10-13 21:19:50,405 INFO: [PFT_R..][epoch: 21, iter:  26,600, lr:(5.000e-06,)] [eta: 5 days, 1:44:28, time (data): 1.399 (0.000)] l_pix: 5.5696e-02 
+2025-10-13 21:22:10,347 INFO: [PFT_R..][epoch: 21, iter:  26,700, lr:(5.000e-06,)] [eta: 5 days, 1:41:13, time (data): 1.399 (0.000)] l_pix: 7.6814e-02 
+2025-10-13 21:24:30,274 INFO: [PFT_R..][epoch: 21, iter:  26,800, lr:(5.000e-06,)] [eta: 5 days, 1:37:57, time (data): 1.399 (0.000)] l_pix: 5.8735e-02 
+2025-10-13 21:26:50,183 INFO: [PFT_R..][epoch: 21, iter:  26,900, lr:(5.000e-06,)] [eta: 5 days, 1:34:42, time (data): 1.399 (0.000)] l_pix: 7.9223e-02 
+2025-10-13 21:29:10,011 INFO: [PFT_R..][epoch: 21, iter:  27,000, lr:(5.000e-06,)] [eta: 5 days, 1:31:26, time (data): 1.398 (0.000)] l_pix: 8.0742e-02 
+2025-10-13 21:29:33,094 INFO: Validation RGBNIR_val
+	 # psnr: 24.9250	Best: 24.9254 @ 26500 iter
+	 # ssim: 0.6689	Best: 0.6690 @ 25000 iter
+
+2025-10-13 21:31:52,726 INFO: [PFT_R..][epoch: 21, iter:  27,100, lr:(5.000e-06,)] [eta: 5 days, 1:32:27, time (data): 1.397 (0.000)] l_pix: 7.0521e-02 
+2025-10-13 21:34:12,523 INFO: [PFT_R..][epoch: 21, iter:  27,200, lr:(5.000e-06,)] [eta: 5 days, 1:29:11, time (data): 1.398 (0.000)] l_pix: 5.9909e-02 
+2025-10-13 21:36:32,320 INFO: [PFT_R..][epoch: 21, iter:  27,300, lr:(5.000e-06,)] [eta: 5 days, 1:25:55, time (data): 1.398 (0.000)] l_pix: 6.3710e-02 
+2025-10-13 21:38:52,187 INFO: [PFT_R..][epoch: 21, iter:  27,400, lr:(5.000e-06,)] [eta: 5 days, 1:22:40, time (data): 1.398 (0.000)] l_pix: 5.3262e-02 
+2025-10-13 21:41:12,082 INFO: [PFT_R..][epoch: 21, iter:  27,500, lr:(5.000e-06,)] [eta: 5 days, 1:19:26, time (data): 1.399 (0.000)] l_pix: 4.4021e-02 
+2025-10-13 21:41:35,271 INFO: Validation RGBNIR_val
+	 # psnr: 24.9249	Best: 24.9254 @ 26500 iter
+	 # ssim: 0.6689	Best: 0.6690 @ 25000 iter
+
+2025-10-13 21:43:55,092 INFO: [PFT_R..][epoch: 22, iter:  27,600, lr:(5.000e-06,)] [eta: 5 days, 1:20:26, time (data): 1.398 (0.000)] l_pix: 5.0211e-02 
+2025-10-13 21:46:15,064 INFO: [PFT_R..][epoch: 22, iter:  27,700, lr:(5.000e-06,)] [eta: 5 days, 1:17:12, time (data): 1.399 (0.000)] l_pix: 4.5741e-02 
+2025-10-13 21:48:34,966 INFO: [PFT_R..][epoch: 22, iter:  27,800, lr:(5.000e-06,)] [eta: 5 days, 1:13:59, time (data): 1.399 (0.000)] l_pix: 7.4317e-02 
+2025-10-13 21:50:54,893 INFO: [PFT_R..][epoch: 22, iter:  27,900, lr:(5.000e-06,)] [eta: 5 days, 1:10:45, time (data): 1.399 (0.000)] l_pix: 5.3651e-02 
+2025-10-13 21:53:14,719 INFO: [PFT_R..][epoch: 22, iter:  28,000, lr:(5.000e-06,)] [eta: 5 days, 1:07:32, time (data): 1.398 (0.000)] l_pix: 4.7592e-02 
+2025-10-13 21:53:37,603 INFO: Validation RGBNIR_val
+	 # psnr: 24.9248	Best: 24.9254 @ 26500 iter
+	 # ssim: 0.6689	Best: 0.6690 @ 25000 iter
+
+2025-10-13 21:55:57,332 INFO: [PFT_R..][epoch: 22, iter:  28,100, lr:(5.000e-06,)] [eta: 5 days, 1:08:23, time (data): 1.397 (0.000)] l_pix: 4.6709e-02 
+2025-10-13 21:58:17,164 INFO: [PFT_R..][epoch: 22, iter:  28,200, lr:(5.000e-06,)] [eta: 5 days, 1:05:09, time (data): 1.399 (0.000)] l_pix: 6.6910e-02 
+2025-10-13 22:00:37,049 INFO: [PFT_R..][epoch: 22, iter:  28,300, lr:(5.000e-06,)] [eta: 5 days, 1:01:56, time (data): 1.399 (0.000)] l_pix: 6.2293e-02 
+2025-10-13 22:02:56,985 INFO: [PFT_R..][epoch: 22, iter:  28,400, lr:(5.000e-06,)] [eta: 5 days, 0:58:44, time (data): 1.399 (0.000)] l_pix: 5.4387e-02 
+2025-10-13 22:05:16,726 INFO: [PFT_R..][epoch: 22, iter:  28,500, lr:(5.000e-06,)] [eta: 5 days, 0:55:30, time (data): 1.398 (0.000)] l_pix: 5.5039e-02 
+2025-10-13 22:05:39,858 INFO: Validation RGBNIR_val
+	 # psnr: 24.9248	Best: 24.9254 @ 26500 iter
+	 # ssim: 0.6689	Best: 0.6690 @ 25000 iter
+
+2025-10-13 22:07:59,683 INFO: [PFT_R..][epoch: 22, iter:  28,600, lr:(5.000e-06,)] [eta: 5 days, 0:56:22, time (data): 1.400 (0.000)] l_pix: 6.5565e-02 
+2025-10-13 22:10:19,480 INFO: [PFT_R..][epoch: 22, iter:  28,700, lr:(5.000e-06,)] [eta: 5 days, 0:53:08, time (data): 1.399 (0.000)] l_pix: 7.0058e-02 
+2025-10-13 22:12:39,439 INFO: [PFT_R..][epoch: 23, iter:  28,800, lr:(5.000e-06,)] [eta: 5 days, 0:49:57, time (data): 1.400 (0.002)] l_pix: 7.6254e-02 
+2025-10-13 22:14:59,214 INFO: [PFT_R..][epoch: 23, iter:  28,900, lr:(5.000e-06,)] [eta: 5 days, 0:46:44, time (data): 1.399 (0.001)] l_pix: 6.3156e-02 
+2025-10-13 22:17:19,069 INFO: [PFT_R..][epoch: 23, iter:  29,000, lr:(5.000e-06,)] [eta: 5 days, 0:43:33, time (data): 1.399 (0.000)] l_pix: 6.2145e-02 
+2025-10-13 22:17:41,947 INFO: Validation RGBNIR_val
+	 # psnr: 24.9246	Best: 24.9254 @ 26500 iter
+	 # ssim: 0.6690	Best: 0.6690 @ 25000 iter
+
+2025-10-13 22:20:01,715 INFO: [PFT_R..][epoch: 23, iter:  29,100, lr:(5.000e-06,)] [eta: 5 days, 0:44:17, time (data): 1.398 (0.000)] l_pix: 5.8064e-02 
+2025-10-13 22:22:21,585 INFO: [PFT_R..][epoch: 23, iter:  29,200, lr:(5.000e-06,)] [eta: 5 days, 0:41:05, time (data): 1.398 (0.000)] l_pix: 5.2951e-02 
+2025-10-13 22:24:41,475 INFO: [PFT_R..][epoch: 23, iter:  29,300, lr:(5.000e-06,)] [eta: 5 days, 0:37:54, time (data): 1.399 (0.000)] l_pix: 6.1406e-02 
+2025-10-13 22:27:01,317 INFO: [PFT_R..][epoch: 23, iter:  29,400, lr:(5.000e-06,)] [eta: 5 days, 0:34:43, time (data): 1.398 (0.000)] l_pix: 5.9112e-02 
+2025-10-13 22:29:21,242 INFO: [PFT_R..][epoch: 23, iter:  29,500, lr:(5.000e-06,)] [eta: 5 days, 0:31:33, time (data): 1.399 (0.000)] l_pix: 8.8855e-02 
+2025-10-13 22:29:44,296 INFO: Validation RGBNIR_val
+	 # psnr: 24.9245	Best: 24.9254 @ 26500 iter
+	 # ssim: 0.6689	Best: 0.6690 @ 25000 iter
+
+2025-10-13 22:32:04,156 INFO: [PFT_R..][epoch: 23, iter:  29,600, lr:(5.000e-06,)] [eta: 5 days, 0:32:17, time (data): 1.399 (0.000)] l_pix: 6.1060e-02 
+2025-10-13 22:34:23,954 INFO: [PFT_R..][epoch: 23, iter:  29,700, lr:(5.000e-06,)] [eta: 5 days, 0:29:05, time (data): 1.398 (0.000)] l_pix: 7.6988e-02 
+2025-10-13 22:36:43,800 INFO: [PFT_R..][epoch: 23, iter:  29,800, lr:(5.000e-06,)] [eta: 5 days, 0:25:54, time (data): 1.398 (0.000)] l_pix: 3.8878e-02 
+2025-10-13 22:39:03,622 INFO: [PFT_R..][epoch: 23, iter:  29,900, lr:(5.000e-06,)] [eta: 5 days, 0:22:44, time (data): 1.398 (0.000)] l_pix: 5.5681e-02 
+2025-10-13 22:41:23,678 INFO: [PFT_R..][epoch: 23, iter:  30,000, lr:(5.000e-06,)] [eta: 5 days, 0:19:36, time (data): 1.401 (0.000)] l_pix: 6.0383e-02 
+2025-10-13 22:41:23,678 INFO: Saving models and training states.
+2025-10-13 22:41:48,007 INFO: Validation RGBNIR_val
+	 # psnr: 24.9244	Best: 24.9254 @ 26500 iter
+	 # ssim: 0.6689	Best: 0.6690 @ 25000 iter
+
+2025-10-13 22:44:07,971 INFO: [PFT_R..][epoch: 24, iter:  30,100, lr:(5.000e-06,)] [eta: 5 days, 0:20:30, time (data): 1.400 (0.001)] l_pix: 5.0884e-02 
+2025-10-13 22:46:27,937 INFO: [PFT_R..][epoch: 24, iter:  30,200, lr:(5.000e-06,)] [eta: 5 days, 0:17:21, time (data): 1.401 (0.000)] l_pix: 7.6881e-02 
+2025-10-13 22:48:47,890 INFO: [PFT_R..][epoch: 24, iter:  30,300, lr:(5.000e-06,)] [eta: 5 days, 0:14:12, time (data): 1.400 (0.000)] l_pix: 6.9849e-02 
+2025-10-13 22:51:07,953 INFO: [PFT_R..][epoch: 24, iter:  30,400, lr:(5.000e-06,)] [eta: 5 days, 0:11:04, time (data): 1.400 (0.000)] l_pix: 6.8299e-02 
+2025-10-13 22:53:28,012 INFO: [PFT_R..][epoch: 24, iter:  30,500, lr:(5.000e-06,)] [eta: 5 days, 0:07:57, time (data): 1.400 (0.000)] l_pix: 6.0896e-02 
+2025-10-13 22:53:50,946 INFO: Validation RGBNIR_val
+	 # psnr: 24.9246	Best: 24.9254 @ 26500 iter
+	 # ssim: 0.6689	Best: 0.6690 @ 25000 iter
+
+2025-10-13 22:56:10,565 INFO: [PFT_R..][epoch: 24, iter:  30,600, lr:(5.000e-06,)] [eta: 5 days, 0:08:30, time (data): 1.398 (0.000)] l_pix: 4.1946e-02 
+2025-10-13 22:58:30,351 INFO: [PFT_R..][epoch: 24, iter:  30,700, lr:(5.000e-06,)] [eta: 5 days, 0:05:20, time (data): 1.398 (0.000)] l_pix: 5.7172e-02 
+2025-10-13 23:00:50,108 INFO: [PFT_R..][epoch: 24, iter:  30,800, lr:(5.000e-06,)] [eta: 5 days, 0:02:10, time (data): 1.398 (0.001)] l_pix: 5.6090e-02 
+2025-10-13 23:03:10,108 INFO: [PFT_R..][epoch: 24, iter:  30,900, lr:(5.000e-06,)] [eta: 4 days, 23:59:03, time (data): 1.399 (0.000)] l_pix: 4.5749e-02 
+2025-10-13 23:05:30,108 INFO: [PFT_R..][epoch: 24, iter:  31,000, lr:(5.000e-06,)] [eta: 4 days, 23:55:56, time (data): 1.403 (0.000)] l_pix: 5.7773e-02 
+2025-10-13 23:05:53,278 INFO: Validation RGBNIR_val
+	 # psnr: 24.9249	Best: 24.9254 @ 26500 iter
+	 # ssim: 0.6689	Best: 0.6690 @ 25000 iter
+
+2025-10-13 23:08:13,089 INFO: [PFT_R..][epoch: 24, iter:  31,100, lr:(5.000e-06,)] [eta: 4 days, 23:56:30, time (data): 1.400 (0.000)] l_pix: 6.2378e-02 
+2025-10-13 23:10:32,839 INFO: [PFT_R..][epoch: 24, iter:  31,200, lr:(5.000e-06,)] [eta: 4 days, 23:53:21, time (data): 1.397 (0.000)] l_pix: 5.8305e-02 
+2025-10-13 23:12:52,647 INFO: [PFT_R..][epoch: 25, iter:  31,300, lr:(5.000e-06,)] [eta: 4 days, 23:50:12, time (data): 1.398 (0.001)] l_pix: 6.4237e-02 
+2025-10-13 23:15:12,531 INFO: [PFT_R..][epoch: 25, iter:  31,400, lr:(5.000e-06,)] [eta: 4 days, 23:47:04, time (data): 1.396 (0.000)] l_pix: 7.7030e-02 
+2025-10-13 23:17:32,556 INFO: [PFT_R..][epoch: 25, iter:  31,500, lr:(5.000e-06,)] [eta: 4 days, 23:43:58, time (data): 1.399 (0.000)] l_pix: 4.9635e-02 
+2025-10-13 23:17:55,551 INFO: Validation RGBNIR_val
+	 # psnr: 24.9253	Best: 24.9254 @ 26500 iter
+	 # ssim: 0.6689	Best: 0.6690 @ 25000 iter
+
+2025-10-13 23:20:15,323 INFO: [PFT_R..][epoch: 25, iter:  31,600, lr:(5.000e-06,)] [eta: 4 days, 23:44:27, time (data): 1.400 (0.000)] l_pix: 3.7241e-02 
+2025-10-13 23:22:35,300 INFO: [PFT_R..][epoch: 25, iter:  31,700, lr:(5.000e-06,)] [eta: 4 days, 23:41:21, time (data): 1.400 (0.000)] l_pix: 6.7345e-02 
+2025-10-13 23:24:55,380 INFO: [PFT_R..][epoch: 25, iter:  31,800, lr:(5.000e-06,)] [eta: 4 days, 23:38:15, time (data): 1.399 (0.000)] l_pix: 5.9910e-02 
+2025-10-13 23:27:15,199 INFO: [PFT_R..][epoch: 25, iter:  31,900, lr:(5.000e-06,)] [eta: 4 days, 23:35:08, time (data): 1.398 (0.000)] l_pix: 6.5382e-02 
+2025-10-13 23:29:35,179 INFO: [PFT_R..][epoch: 25, iter:  32,000, lr:(5.000e-06,)] [eta: 4 days, 23:32:02, time (data): 1.398 (0.000)] l_pix: 5.6256e-02 
+2025-10-13 23:29:58,276 INFO: Validation RGBNIR_val
+	 # psnr: 24.9253	Best: 24.9254 @ 26500 iter
+	 # ssim: 0.6689	Best: 0.6690 @ 25000 iter
+
+2025-10-13 23:32:18,157 INFO: [PFT_R..][epoch: 25, iter:  32,100, lr:(5.000e-06,)] [eta: 4 days, 23:32:30, time (data): 1.399 (0.000)] l_pix: 8.1692e-02 
+2025-10-13 23:34:38,015 INFO: [PFT_R..][epoch: 25, iter:  32,200, lr:(5.000e-06,)] [eta: 4 days, 23:29:23, time (data): 1.399 (0.000)] l_pix: 5.2939e-02 
+2025-10-13 23:36:57,972 INFO: [PFT_R..][epoch: 25, iter:  32,300, lr:(5.000e-06,)] [eta: 4 days, 23:26:17, time (data): 1.399 (0.000)] l_pix: 6.0761e-02 
+2025-10-13 23:39:17,753 INFO: [PFT_R..][epoch: 25, iter:  32,400, lr:(5.000e-06,)] [eta: 4 days, 23:23:10, time (data): 1.396 (0.000)] l_pix: 5.6735e-02 
+2025-10-13 23:41:37,585 INFO: [PFT_R..][epoch: 25, iter:  32,500, lr:(5.000e-06,)] [eta: 4 days, 23:20:03, time (data): 1.398 (0.000)] l_pix: 5.2490e-02 
+2025-10-13 23:42:00,692 INFO: Validation RGBNIR_val
+	 # psnr: 24.9252	Best: 24.9254 @ 26500 iter
+	 # ssim: 0.6689	Best: 0.6690 @ 25000 iter
+
+2025-10-13 23:44:20,518 INFO: [PFT_R..][epoch: 26, iter:  32,600, lr:(5.000e-06,)] [eta: 4 days, 23:20:28, time (data): 1.399 (0.000)] l_pix: 5.9893e-02 
+2025-10-13 23:46:40,533 INFO: [PFT_R..][epoch: 26, iter:  32,700, lr:(5.000e-06,)] [eta: 4 days, 23:17:23, time (data): 1.400 (0.000)] l_pix: 4.3201e-02 
+2025-10-13 23:49:00,357 INFO: [PFT_R..][epoch: 26, iter:  32,800, lr:(5.000e-06,)] [eta: 4 days, 23:14:17, time (data): 1.398 (0.000)] l_pix: 6.7090e-02 
+2025-10-13 23:51:20,272 INFO: [PFT_R..][epoch: 26, iter:  32,900, lr:(5.000e-06,)] [eta: 4 days, 23:11:12, time (data): 1.399 (0.000)] l_pix: 5.0230e-02 
+2025-10-13 23:53:40,205 INFO: [PFT_R..][epoch: 26, iter:  33,000, lr:(5.000e-06,)] [eta: 4 days, 23:08:07, time (data): 1.400 (0.000)] l_pix: 6.0642e-02 
+2025-10-13 23:54:03,054 INFO: Validation RGBNIR_val
+	 # psnr: 24.9254	Best: 24.9254 @ 33000 iter
+	 # ssim: 0.6689	Best: 0.6690 @ 25000 iter
+
+2025-10-13 23:56:22,853 INFO: [PFT_R..][epoch: 26, iter:  33,100, lr:(5.000e-06,)] [eta: 4 days, 23:08:26, time (data): 1.399 (0.000)] l_pix: 5.9893e-02 
+2025-10-13 23:58:42,719 INFO: [PFT_R..][epoch: 26, iter:  33,200, lr:(5.000e-06,)] [eta: 4 days, 23:05:20, time (data): 1.399 (0.000)] l_pix: 4.8482e-02 
+2025-10-14 00:01:02,536 INFO: [PFT_R..][epoch: 26, iter:  33,300, lr:(5.000e-06,)] [eta: 4 days, 23:02:15, time (data): 1.398 (0.000)] l_pix: 8.4309e-02 
+2025-10-14 00:03:22,345 INFO: [PFT_R..][epoch: 26, iter:  33,400, lr:(5.000e-06,)] [eta: 4 days, 22:59:09, time (data): 1.401 (0.000)] l_pix: 7.2471e-02 
+2025-10-14 00:05:41,988 INFO: [PFT_R..][epoch: 26, iter:  33,500, lr:(5.000e-06,)] [eta: 4 days, 22:56:02, time (data): 1.398 (0.000)] l_pix: 6.5682e-02 
+2025-10-14 00:06:05,026 INFO: Validation RGBNIR_val
+	 # psnr: 24.9260	Best: 24.9260 @ 33500 iter
+	 # ssim: 0.6689	Best: 0.6690 @ 25000 iter
+
+2025-10-14 00:08:24,888 INFO: [PFT_R..][epoch: 26, iter:  33,600, lr:(5.000e-06,)] [eta: 4 days, 22:56:21, time (data): 1.399 (0.000)] l_pix: 7.5857e-02 
+2025-10-14 00:10:44,735 INFO: [PFT_R..][epoch: 26, iter:  33,700, lr:(5.000e-06,)] [eta: 4 days, 22:53:16, time (data): 1.399 (0.000)] l_pix: 7.1448e-02 
+2025-10-14 00:13:04,776 INFO: [PFT_R..][epoch: 27, iter:  33,800, lr:(5.000e-06,)] [eta: 4 days, 22:50:13, time (data): 1.401 (0.000)] l_pix: 5.8152e-02 
+2025-10-14 00:15:24,775 INFO: [PFT_R..][epoch: 27, iter:  33,900, lr:(5.000e-06,)] [eta: 4 days, 22:47:10, time (data): 1.400 (0.000)] l_pix: 5.4664e-02 
+2025-10-14 00:17:44,508 INFO: [PFT_R..][epoch: 27, iter:  34,000, lr:(5.000e-06,)] [eta: 4 days, 22:44:05, time (data): 1.399 (0.000)] l_pix: 5.5141e-02 
+2025-10-14 00:18:07,426 INFO: Validation RGBNIR_val
+	 # psnr: 24.9263	Best: 24.9263 @ 34000 iter
+	 # ssim: 0.6690	Best: 0.6690 @ 25000 iter
+
+2025-10-14 00:20:27,096 INFO: [PFT_R..][epoch: 27, iter:  34,100, lr:(5.000e-06,)] [eta: 4 days, 22:44:18, time (data): 1.397 (0.000)] l_pix: 5.6304e-02 
+2025-10-14 00:22:46,793 INFO: [PFT_R..][epoch: 27, iter:  34,200, lr:(5.000e-06,)] [eta: 4 days, 22:41:12, time (data): 1.395 (0.000)] l_pix: 6.0627e-02 
+2025-10-14 00:25:06,737 INFO: [PFT_R..][epoch: 27, iter:  34,300, lr:(5.000e-06,)] [eta: 4 days, 22:38:09, time (data): 1.398 (0.000)] l_pix: 7.7187e-02 
+2025-10-14 00:27:26,698 INFO: [PFT_R..][epoch: 27, iter:  34,400, lr:(5.000e-06,)] [eta: 4 days, 22:35:06, time (data): 1.400 (0.000)] l_pix: 5.7559e-02 
+2025-10-14 00:29:46,583 INFO: [PFT_R..][epoch: 27, iter:  34,500, lr:(5.000e-06,)] [eta: 4 days, 22:32:03, time (data): 1.399 (0.000)] l_pix: 5.2923e-02 
+2025-10-14 00:30:09,608 INFO: Validation RGBNIR_val
+	 # psnr: 24.9266	Best: 24.9266 @ 34500 iter
+	 # ssim: 0.6690	Best: 0.6690 @ 25000 iter
+
+2025-10-14 00:32:29,319 INFO: [PFT_R..][epoch: 27, iter:  34,600, lr:(5.000e-06,)] [eta: 4 days, 22:32:15, time (data): 1.395 (0.000)] l_pix: 6.1342e-02 
+2025-10-14 00:34:49,116 INFO: [PFT_R..][epoch: 27, iter:  34,700, lr:(5.000e-06,)] [eta: 4 days, 22:29:11, time (data): 1.397 (0.000)] l_pix: 5.3544e-02 
+2025-10-14 00:37:08,906 INFO: [PFT_R..][epoch: 27, iter:  34,800, lr:(5.000e-06,)] [eta: 4 days, 22:26:07, time (data): 1.397 (0.000)] l_pix: 4.8386e-02 
+2025-10-14 00:39:28,710 INFO: [PFT_R..][epoch: 27, iter:  34,900, lr:(5.000e-06,)] [eta: 4 days, 22:23:03, time (data): 1.398 (0.000)] l_pix: 6.7938e-02 
+2025-10-14 00:41:48,538 INFO: [PFT_R..][epoch: 27, iter:  35,000, lr:(5.000e-06,)] [eta: 4 days, 22:20:00, time (data): 1.397 (0.000)] l_pix: 6.0881e-02 
+2025-10-14 00:41:48,539 INFO: Saving models and training states.
+2025-10-14 00:42:12,751 INFO: Validation RGBNIR_val
+	 # psnr: 24.9267	Best: 24.9267 @ 35000 iter
+	 # ssim: 0.6690	Best: 0.6690 @ 35000 iter
+
+2025-10-14 00:44:32,476 INFO: [PFT_R..][epoch: 28, iter:  35,100, lr:(5.000e-06,)] [eta: 4 days, 22:20:20, time (data): 1.397 (0.001)] l_pix: 6.7867e-02 
+2025-10-14 00:46:52,553 INFO: [PFT_R..][epoch: 28, iter:  35,200, lr:(5.000e-06,)] [eta: 4 days, 22:17:19, time (data): 1.398 (0.000)] l_pix: 5.7772e-02 
+2025-10-14 00:49:12,483 INFO: [PFT_R..][epoch: 28, iter:  35,300, lr:(5.000e-06,)] [eta: 4 days, 22:14:17, time (data): 1.399 (0.000)] l_pix: 4.3848e-02 
+2025-10-14 00:51:32,359 INFO: [PFT_R..][epoch: 28, iter:  35,400, lr:(5.000e-06,)] [eta: 4 days, 22:11:14, time (data): 1.401 (0.000)] l_pix: 5.2060e-02 
+2025-10-14 00:53:52,240 INFO: [PFT_R..][epoch: 28, iter:  35,500, lr:(5.000e-06,)] [eta: 4 days, 22:08:12, time (data): 1.399 (0.000)] l_pix: 7.9003e-02 
+2025-10-14 00:54:15,168 INFO: Validation RGBNIR_val
+	 # psnr: 24.9268	Best: 24.9268 @ 35500 iter
+	 # ssim: 0.6690	Best: 0.6690 @ 35500 iter
+
+2025-10-14 00:56:35,165 INFO: [PFT_R..][epoch: 28, iter:  35,600, lr:(5.000e-06,)] [eta: 4 days, 22:08:21, time (data): 1.399 (0.000)] l_pix: 5.1898e-02 
+2025-10-14 00:58:55,016 INFO: [PFT_R..][epoch: 28, iter:  35,700, lr:(5.000e-06,)] [eta: 4 days, 22:05:18, time (data): 1.399 (0.000)] l_pix: 7.2482e-02 
+2025-10-14 01:01:14,783 INFO: [PFT_R..][epoch: 28, iter:  35,800, lr:(5.000e-06,)] [eta: 4 days, 22:02:15, time (data): 1.398 (0.000)] l_pix: 6.9231e-02 
+2025-10-14 01:03:34,766 INFO: [PFT_R..][epoch: 28, iter:  35,900, lr:(5.000e-06,)] [eta: 4 days, 21:59:14, time (data): 1.400 (0.000)] l_pix: 4.5033e-02 
+2025-10-14 01:05:54,647 INFO: [PFT_R..][epoch: 28, iter:  36,000, lr:(5.000e-06,)] [eta: 4 days, 21:56:13, time (data): 1.401 (0.000)] l_pix: 7.0759e-02 
+2025-10-14 01:06:17,671 INFO: Validation RGBNIR_val
+	 # psnr: 24.9267	Best: 24.9268 @ 35500 iter
+	 # ssim: 0.6690	Best: 0.6690 @ 36000 iter
+
+2025-10-14 01:08:37,458 INFO: [PFT_R..][epoch: 28, iter:  36,100, lr:(5.000e-06,)] [eta: 4 days, 21:56:18, time (data): 1.398 (0.000)] l_pix: 5.4673e-02 
+2025-10-14 01:10:57,461 INFO: [PFT_R..][epoch: 28, iter:  36,200, lr:(5.000e-06,)] [eta: 4 days, 21:53:17, time (data): 1.402 (0.000)] l_pix: 7.1906e-02 
+2025-10-14 01:13:17,287 INFO: [PFT_R..][epoch: 29, iter:  36,300, lr:(5.000e-06,)] [eta: 4 days, 21:50:16, time (data): 1.399 (0.001)] l_pix: 7.3356e-02 
+2025-10-14 01:15:37,232 INFO: [PFT_R..][epoch: 29, iter:  36,400, lr:(5.000e-06,)] [eta: 4 days, 21:47:15, time (data): 1.396 (0.000)] l_pix: 5.1235e-02 
+2025-10-14 01:17:57,141 INFO: [PFT_R..][epoch: 29, iter:  36,500, lr:(5.000e-06,)] [eta: 4 days, 21:44:14, time (data): 1.399 (0.000)] l_pix: 6.8225e-02 
+2025-10-14 01:18:20,165 INFO: Validation RGBNIR_val
+	 # psnr: 24.9268	Best: 24.9268 @ 35500 iter
+	 # ssim: 0.6690	Best: 0.6690 @ 36000 iter
+
+2025-10-14 01:20:40,078 INFO: [PFT_R..][epoch: 29, iter:  36,600, lr:(5.000e-06,)] [eta: 4 days, 21:44:18, time (data): 1.399 (0.000)] l_pix: 7.3168e-02 
+2025-10-14 01:23:00,122 INFO: [PFT_R..][epoch: 29, iter:  36,700, lr:(5.000e-06,)] [eta: 4 days, 21:41:18, time (data): 1.400 (0.000)] l_pix: 6.9669e-02 
+2025-10-14 01:25:19,771 INFO: [PFT_R..][epoch: 29, iter:  36,800, lr:(5.000e-06,)] [eta: 4 days, 21:38:16, time (data): 1.397 (0.000)] l_pix: 4.5551e-02 
+2025-10-14 01:27:39,593 INFO: [PFT_R..][epoch: 29, iter:  36,900, lr:(5.000e-06,)] [eta: 4 days, 21:35:15, time (data): 1.398 (0.000)] l_pix: 5.6872e-02 
+2025-10-14 01:29:59,387 INFO: [PFT_R..][epoch: 29, iter:  37,000, lr:(5.000e-06,)] [eta: 4 days, 21:32:13, time (data): 1.401 (0.000)] l_pix: 9.5490e-02 
+2025-10-14 01:30:22,475 INFO: Validation RGBNIR_val
+	 # psnr: 24.9264	Best: 24.9268 @ 35500 iter
+	 # ssim: 0.6690	Best: 0.6690 @ 36000 iter
+
+2025-10-14 01:32:42,242 INFO: [PFT_R..][epoch: 29, iter:  37,100, lr:(5.000e-06,)] [eta: 4 days, 21:32:15, time (data): 1.398 (0.000)] l_pix: 5.7355e-02 
+2025-10-14 01:35:02,112 INFO: [PFT_R..][epoch: 29, iter:  37,200, lr:(5.000e-06,)] [eta: 4 days, 21:29:14, time (data): 1.400 (0.000)] l_pix: 6.0279e-02 
+2025-10-14 01:37:22,120 INFO: [PFT_R..][epoch: 29, iter:  37,300, lr:(5.000e-06,)] [eta: 4 days, 21:26:15, time (data): 1.400 (0.000)] l_pix: 6.6010e-02 
+2025-10-14 01:39:42,137 INFO: [PFT_R..][epoch: 29, iter:  37,400, lr:(5.000e-06,)] [eta: 4 days, 21:23:16, time (data): 1.402 (0.000)] l_pix: 6.7267e-02 
+2025-10-14 01:42:02,195 INFO: [PFT_R..][epoch: 29, iter:  37,500, lr:(5.000e-06,)] [eta: 4 days, 21:20:17, time (data): 1.401 (0.000)] l_pix: 8.2321e-02 
+2025-10-14 01:42:25,400 INFO: Validation RGBNIR_val
+	 # psnr: 24.9266	Best: 24.9268 @ 35500 iter
+	 # ssim: 0.6690	Best: 0.6690 @ 36000 iter
+
+2025-10-14 01:44:45,322 INFO: [PFT_R..][epoch: 30, iter:  37,600, lr:(5.000e-06,)] [eta: 4 days, 21:20:18, time (data): 1.403 (0.001)] l_pix: 6.6852e-02 
+2025-10-14 01:47:05,119 INFO: [PFT_R..][epoch: 30, iter:  37,700, lr:(5.000e-06,)] [eta: 4 days, 21:17:18, time (data): 1.399 (0.000)] l_pix: 4.7267e-02 
+2025-10-14 01:49:24,986 INFO: [PFT_R..][epoch: 30, iter:  37,800, lr:(5.000e-06,)] [eta: 4 days, 21:14:18, time (data): 1.399 (0.001)] l_pix: 5.9689e-02 
+2025-10-14 01:51:45,135 INFO: [PFT_R..][epoch: 30, iter:  37,900, lr:(5.000e-06,)] [eta: 4 days, 21:11:20, time (data): 1.401 (0.000)] l_pix: 5.0253e-02 
+2025-10-14 01:54:04,842 INFO: [PFT_R..][epoch: 30, iter:  38,000, lr:(5.000e-06,)] [eta: 4 days, 21:08:19, time (data): 1.396 (0.000)] l_pix: 5.2548e-02 
+2025-10-14 01:54:27,614 INFO: Validation RGBNIR_val
+	 # psnr: 24.9268	Best: 24.9268 @ 38000 iter
+	 # ssim: 0.6690	Best: 0.6690 @ 36000 iter
+
+2025-10-14 01:56:47,253 INFO: [PFT_R..][epoch: 30, iter:  38,100, lr:(5.000e-06,)] [eta: 4 days, 21:08:13, time (data): 1.396 (0.000)] l_pix: 6.2620e-02 
+2025-10-14 01:59:07,061 INFO: [PFT_R..][epoch: 30, iter:  38,200, lr:(5.000e-06,)] [eta: 4 days, 21:05:13, time (data): 1.394 (0.000)] l_pix: 6.2948e-02 
+2025-10-14 02:01:26,987 INFO: [PFT_R..][epoch: 30, iter:  38,300, lr:(5.000e-06,)] [eta: 4 days, 21:02:14, time (data): 1.399 (0.000)] l_pix: 6.2356e-02 
+2025-10-14 02:03:46,872 INFO: [PFT_R..][epoch: 30, iter:  38,400, lr:(5.000e-06,)] [eta: 4 days, 20:59:15, time (data): 1.400 (0.000)] l_pix: 6.6750e-02 
+2025-10-14 02:06:06,748 INFO: [PFT_R..][epoch: 30, iter:  38,500, lr:(5.000e-06,)] [eta: 4 days, 20:56:16, time (data): 1.399 (0.000)] l_pix: 8.1504e-02 
+2025-10-14 02:06:29,858 INFO: Validation RGBNIR_val
+	 # psnr: 24.9270	Best: 24.9270 @ 38500 iter
+	 # ssim: 0.6690	Best: 0.6690 @ 36000 iter
+
+2025-10-14 02:08:49,746 INFO: [PFT_R..][epoch: 30, iter:  38,600, lr:(5.000e-06,)] [eta: 4 days, 20:56:12, time (data): 1.401 (0.000)] l_pix: 4.9675e-02 
+2025-10-14 02:11:09,722 INFO: [PFT_R..][epoch: 30, iter:  38,700, lr:(5.000e-06,)] [eta: 4 days, 20:53:13, time (data): 1.400 (0.000)] l_pix: 8.0746e-02 
+2025-10-14 02:13:29,757 INFO: [PFT_R..][epoch: 31, iter:  38,800, lr:(5.000e-06,)] [eta: 4 days, 20:50:16, time (data): 1.393 (0.000)] l_pix: 6.2589e-02 
+2025-10-14 02:15:49,508 INFO: [PFT_R..][epoch: 31, iter:  38,900, lr:(5.000e-06,)] [eta: 4 days, 20:47:16, time (data): 1.397 (0.000)] l_pix: 6.8195e-02 
+2025-10-14 02:18:09,497 INFO: [PFT_R..][epoch: 31, iter:  39,000, lr:(5.000e-06,)] [eta: 4 days, 20:44:19, time (data): 1.405 (0.000)] l_pix: 7.6067e-02 
+2025-10-14 02:18:32,442 INFO: Validation RGBNIR_val
+	 # psnr: 24.9270	Best: 24.9270 @ 39000 iter
+	 # ssim: 0.6690	Best: 0.6690 @ 36000 iter
+
+2025-10-14 02:20:52,147 INFO: [PFT_R..][epoch: 31, iter:  39,100, lr:(5.000e-06,)] [eta: 4 days, 20:44:10, time (data): 1.397 (0.000)] l_pix: 7.7095e-02 
+2025-10-14 02:23:12,074 INFO: [PFT_R..][epoch: 31, iter:  39,200, lr:(5.000e-06,)] [eta: 4 days, 20:41:12, time (data): 1.402 (0.000)] l_pix: 6.5133e-02 
+2025-10-14 02:25:31,832 INFO: [PFT_R..][epoch: 31, iter:  39,300, lr:(5.000e-06,)] [eta: 4 days, 20:38:13, time (data): 1.398 (0.000)] l_pix: 3.4661e-02 
+2025-10-14 02:27:51,675 INFO: [PFT_R..][epoch: 31, iter:  39,400, lr:(5.000e-06,)] [eta: 4 days, 20:35:14, time (data): 1.399 (0.000)] l_pix: 6.7728e-02 
+2025-10-14 02:30:11,536 INFO: [PFT_R..][epoch: 31, iter:  39,500, lr:(5.000e-06,)] [eta: 4 days, 20:32:16, time (data): 1.399 (0.000)] l_pix: 6.2837e-02 
+2025-10-14 02:30:34,558 INFO: Validation RGBNIR_val
+	 # psnr: 24.9271	Best: 24.9271 @ 39500 iter
+	 # ssim: 0.6690	Best: 0.6690 @ 39500 iter
+
+2025-10-14 02:32:54,385 INFO: [PFT_R..][epoch: 31, iter:  39,600, lr:(5.000e-06,)] [eta: 4 days, 20:32:07, time (data): 1.404 (0.000)] l_pix: 6.1883e-02 
+2025-10-14 02:35:14,225 INFO: [PFT_R..][epoch: 31, iter:  39,700, lr:(5.000e-06,)] [eta: 4 days, 20:29:09, time (data): 1.399 (0.000)] l_pix: 7.4475e-02 
+2025-10-14 02:37:34,069 INFO: [PFT_R..][epoch: 31, iter:  39,800, lr:(5.000e-06,)] [eta: 4 days, 20:26:11, time (data): 1.394 (0.000)] l_pix: 5.3857e-02 
+2025-10-14 02:39:53,974 INFO: [PFT_R..][epoch: 31, iter:  39,900, lr:(5.000e-06,)] [eta: 4 days, 20:23:13, time (data): 1.399 (0.000)] l_pix: 5.7939e-02 
+2025-10-14 02:42:13,999 INFO: [PFT_R..][epoch: 31, iter:  40,000, lr:(5.000e-06,)] [eta: 4 days, 20:20:17, time (data): 1.395 (0.000)] l_pix: 6.3030e-02 
+2025-10-14 02:42:13,999 INFO: Saving models and training states.
+2025-10-14 02:42:38,199 INFO: Validation RGBNIR_val
+	 # psnr: 24.9276	Best: 24.9276 @ 40000 iter
+	 # ssim: 0.6690	Best: 0.6690 @ 40000 iter
+
+2025-10-14 02:44:57,956 INFO: [PFT_R..][epoch: 32, iter:  40,100, lr:(5.000e-06,)] [eta: 4 days, 20:20:14, time (data): 1.398 (0.001)] l_pix: 6.0877e-02 
+2025-10-14 02:47:17,823 INFO: [PFT_R..][epoch: 32, iter:  40,200, lr:(5.000e-06,)] [eta: 4 days, 20:17:16, time (data): 1.398 (0.001)] l_pix: 7.0491e-02 
+2025-10-14 02:49:37,895 INFO: [PFT_R..][epoch: 32, iter:  40,300, lr:(5.000e-06,)] [eta: 4 days, 20:14:20, time (data): 1.401 (0.000)] l_pix: 4.9369e-02 
+2025-10-14 02:51:57,648 INFO: [PFT_R..][epoch: 32, iter:  40,400, lr:(5.000e-06,)] [eta: 4 days, 20:11:22, time (data): 1.399 (0.000)] l_pix: 6.9506e-02 
+2025-10-14 02:54:17,665 INFO: [PFT_R..][epoch: 32, iter:  40,500, lr:(5.000e-06,)] [eta: 4 days, 20:08:26, time (data): 1.400 (0.000)] l_pix: 6.0727e-02 
+2025-10-14 02:54:40,475 INFO: Validation RGBNIR_val
+	 # psnr: 24.9275	Best: 24.9276 @ 40000 iter
+	 # ssim: 0.6690	Best: 0.6690 @ 40500 iter
+
+2025-10-14 02:57:00,269 INFO: [PFT_R..][epoch: 32, iter:  40,600, lr:(5.000e-06,)] [eta: 4 days, 20:08:11, time (data): 1.399 (0.000)] l_pix: 6.3858e-02 
+2025-10-14 02:59:20,141 INFO: [PFT_R..][epoch: 32, iter:  40,700, lr:(5.000e-06,)] [eta: 4 days, 20:05:14, time (data): 1.399 (0.000)] l_pix: 5.0378e-02 
+2025-10-14 03:01:40,153 INFO: [PFT_R..][epoch: 32, iter:  40,800, lr:(5.000e-06,)] [eta: 4 days, 20:02:18, time (data): 1.399 (0.000)] l_pix: 9.1788e-02 
+2025-10-14 03:04:00,142 INFO: [PFT_R..][epoch: 32, iter:  40,900, lr:(5.000e-06,)] [eta: 4 days, 19:59:22, time (data): 1.400 (0.000)] l_pix: 5.3412e-02 
+2025-10-14 03:06:20,098 INFO: [PFT_R..][epoch: 32, iter:  41,000, lr:(5.000e-06,)] [eta: 4 days, 19:56:26, time (data): 1.400 (0.000)] l_pix: 6.2991e-02 
+2025-10-14 03:06:43,191 INFO: Validation RGBNIR_val
+	 # psnr: 24.9276	Best: 24.9276 @ 41000 iter
+	 # ssim: 0.6691	Best: 0.6691 @ 41000 iter
+
+2025-10-14 03:09:02,961 INFO: [PFT_R..][epoch: 32, iter:  41,100, lr:(5.000e-06,)] [eta: 4 days, 19:56:11, time (data): 1.398 (0.000)] l_pix: 4.2255e-02 
+2025-10-14 03:11:22,875 INFO: [PFT_R..][epoch: 32, iter:  41,200, lr:(5.000e-06,)] [eta: 4 days, 19:53:15, time (data): 1.398 (0.000)] l_pix: 5.3572e-02 
+2025-10-14 03:13:42,888 INFO: [PFT_R..][epoch: 33, iter:  41,300, lr:(5.000e-06,)] [eta: 4 days, 19:50:19, time (data): 1.400 (0.001)] l_pix: 4.6770e-02 
+2025-10-14 03:16:02,811 INFO: [PFT_R..][epoch: 33, iter:  41,400, lr:(5.000e-06,)] [eta: 4 days, 19:47:23, time (data): 1.400 (0.001)] l_pix: 6.1761e-02 
+2025-10-14 03:18:22,722 INFO: [PFT_R..][epoch: 33, iter:  41,500, lr:(5.000e-06,)] [eta: 4 days, 19:44:27, time (data): 1.399 (0.000)] l_pix: 6.4146e-02 
+2025-10-14 03:18:45,653 INFO: Validation RGBNIR_val
+	 # psnr: 24.9273	Best: 24.9276 @ 41000 iter
+	 # ssim: 0.6690	Best: 0.6691 @ 41000 iter
+
+2025-10-14 03:21:05,587 INFO: [PFT_R..][epoch: 33, iter:  41,600, lr:(5.000e-06,)] [eta: 4 days, 19:44:11, time (data): 1.399 (0.000)] l_pix: 5.7271e-02 
+2025-10-14 03:23:25,511 INFO: [PFT_R..][epoch: 33, iter:  41,700, lr:(5.000e-06,)] [eta: 4 days, 19:41:15, time (data): 1.400 (0.000)] l_pix: 4.9588e-02 
+2025-10-14 03:25:45,608 INFO: [PFT_R..][epoch: 33, iter:  41,800, lr:(5.000e-06,)] [eta: 4 days, 19:38:20, time (data): 1.400 (0.000)] l_pix: 7.8513e-02 
+2025-10-14 03:28:05,722 INFO: [PFT_R..][epoch: 33, iter:  41,900, lr:(5.000e-06,)] [eta: 4 days, 19:35:26, time (data): 1.401 (0.000)] l_pix: 7.2633e-02 
+2025-10-14 03:30:25,478 INFO: [PFT_R..][epoch: 33, iter:  42,000, lr:(5.000e-06,)] [eta: 4 days, 19:32:29, time (data): 1.399 (0.000)] l_pix: 5.8127e-02 
+2025-10-14 03:30:48,577 INFO: Validation RGBNIR_val
+	 # psnr: 24.9271	Best: 24.9276 @ 41000 iter
+	 # ssim: 0.6690	Best: 0.6691 @ 41000 iter
+
+2025-10-14 03:33:08,316 INFO: [PFT_R..][epoch: 33, iter:  42,100, lr:(5.000e-06,)] [eta: 4 days, 19:32:11, time (data): 1.398 (0.000)] l_pix: 5.7966e-02 
+2025-10-14 03:35:28,084 INFO: [PFT_R..][epoch: 33, iter:  42,200, lr:(5.000e-06,)] [eta: 4 days, 19:29:14, time (data): 1.398 (0.000)] l_pix: 4.8365e-02 
+2025-10-14 03:37:48,075 INFO: [PFT_R..][epoch: 33, iter:  42,300, lr:(5.000e-06,)] [eta: 4 days, 19:26:19, time (data): 1.400 (0.000)] l_pix: 6.6103e-02 
+2025-10-14 03:40:07,931 INFO: [PFT_R..][epoch: 33, iter:  42,400, lr:(5.000e-06,)] [eta: 4 days, 19:23:24, time (data): 1.399 (0.000)] l_pix: 6.8433e-02 
+2025-10-14 03:42:27,755 INFO: [PFT_R..][epoch: 33, iter:  42,500, lr:(5.000e-06,)] [eta: 4 days, 19:20:28, time (data): 1.398 (0.000)] l_pix: 6.3592e-02 
+2025-10-14 03:42:50,921 INFO: Validation RGBNIR_val
+	 # psnr: 24.9271	Best: 24.9276 @ 41000 iter
+	 # ssim: 0.6690	Best: 0.6691 @ 41000 iter
+
+2025-10-14 03:45:10,772 INFO: [PFT_R..][epoch: 34, iter:  42,600, lr:(5.000e-06,)] [eta: 4 days, 19:20:09, time (data): 1.398 (0.001)] l_pix: 4.8871e-02 
+2025-10-14 03:47:30,725 INFO: [PFT_R..][epoch: 34, iter:  42,700, lr:(5.000e-06,)] [eta: 4 days, 19:17:14, time (data): 1.400 (0.000)] l_pix: 6.6181e-02 
+2025-10-14 03:49:50,564 INFO: [PFT_R..][epoch: 34, iter:  42,800, lr:(5.000e-06,)] [eta: 4 days, 19:14:19, time (data): 1.399 (0.000)] l_pix: 6.7863e-02 
+2025-10-14 03:52:10,440 INFO: [PFT_R..][epoch: 34, iter:  42,900, lr:(5.000e-06,)] [eta: 4 days, 19:11:24, time (data): 1.399 (0.000)] l_pix: 7.1993e-02 
+2025-10-14 03:54:30,481 INFO: [PFT_R..][epoch: 34, iter:  43,000, lr:(5.000e-06,)] [eta: 4 days, 19:08:30, time (data): 1.400 (0.000)] l_pix: 8.3939e-02 
+2025-10-14 03:54:53,370 INFO: Validation RGBNIR_val
+	 # psnr: 24.9268	Best: 24.9276 @ 41000 iter
+	 # ssim: 0.6690	Best: 0.6691 @ 41000 iter
+
+2025-10-14 03:57:13,132 INFO: [PFT_R..][epoch: 34, iter:  43,100, lr:(5.000e-06,)] [eta: 4 days, 19:08:07, time (data): 1.397 (0.001)] l_pix: 6.3445e-02 
+2025-10-14 03:59:33,041 INFO: [PFT_R..][epoch: 34, iter:  43,200, lr:(5.000e-06,)] [eta: 4 days, 19:05:12, time (data): 1.398 (0.000)] l_pix: 5.1564e-02 
+2025-10-14 04:01:52,880 INFO: [PFT_R..][epoch: 34, iter:  43,300, lr:(5.000e-06,)] [eta: 4 days, 19:02:17, time (data): 1.398 (0.000)] l_pix: 5.9832e-02 
+2025-10-14 04:04:12,735 INFO: [PFT_R..][epoch: 34, iter:  43,400, lr:(5.000e-06,)] [eta: 4 days, 18:59:22, time (data): 1.398 (0.000)] l_pix: 5.2961e-02 
+2025-10-14 04:06:32,724 INFO: [PFT_R..][epoch: 34, iter:  43,500, lr:(5.000e-06,)] [eta: 4 days, 18:56:28, time (data): 1.400 (0.000)] l_pix: 6.1363e-02 
+2025-10-14 04:06:55,862 INFO: Validation RGBNIR_val
+	 # psnr: 24.9270	Best: 24.9276 @ 41000 iter
+	 # ssim: 0.6690	Best: 0.6691 @ 41000 iter
+
+2025-10-14 04:09:15,681 INFO: [PFT_R..][epoch: 34, iter:  43,600, lr:(5.000e-06,)] [eta: 4 days, 18:56:06, time (data): 1.399 (0.000)] l_pix: 7.7585e-02 
+2025-10-14 04:11:35,722 INFO: [PFT_R..][epoch: 34, iter:  43,700, lr:(5.000e-06,)] [eta: 4 days, 18:53:12, time (data): 1.400 (0.000)] l_pix: 5.0266e-02 
+2025-10-14 04:13:55,613 INFO: [PFT_R..][epoch: 35, iter:  43,800, lr:(5.000e-06,)] [eta: 4 days, 18:50:18, time (data): 1.399 (0.001)] l_pix: 7.4588e-02 
+2025-10-14 04:16:15,491 INFO: [PFT_R..][epoch: 35, iter:  43,900, lr:(5.000e-06,)] [eta: 4 days, 18:47:24, time (data): 1.399 (0.000)] l_pix: 8.0908e-02 
+2025-10-14 04:18:35,343 INFO: [PFT_R..][epoch: 35, iter:  44,000, lr:(5.000e-06,)] [eta: 4 days, 18:44:29, time (data): 1.399 (0.000)] l_pix: 6.4960e-02 
+2025-10-14 04:18:58,292 INFO: Validation RGBNIR_val
+	 # psnr: 24.9270	Best: 24.9276 @ 41000 iter
+	 # ssim: 0.6690	Best: 0.6691 @ 41000 iter
+
+2025-10-14 04:21:18,243 INFO: [PFT_R..][epoch: 35, iter:  44,100, lr:(5.000e-06,)] [eta: 4 days, 18:44:05, time (data): 1.400 (0.000)] l_pix: 4.5870e-02 
+2025-10-14 04:23:38,347 INFO: [PFT_R..][epoch: 35, iter:  44,200, lr:(5.000e-06,)] [eta: 4 days, 18:41:12, time (data): 1.401 (0.000)] l_pix: 6.8351e-02 
+2025-10-14 04:25:58,239 INFO: [PFT_R..][epoch: 35, iter:  44,300, lr:(5.000e-06,)] [eta: 4 days, 18:38:18, time (data): 1.399 (0.000)] l_pix: 7.2019e-02 
+2025-10-14 04:28:18,033 INFO: [PFT_R..][epoch: 35, iter:  44,400, lr:(5.000e-06,)] [eta: 4 days, 18:35:24, time (data): 1.398 (0.000)] l_pix: 6.1580e-02 
+2025-10-14 04:30:37,863 INFO: [PFT_R..][epoch: 35, iter:  44,500, lr:(5.000e-06,)] [eta: 4 days, 18:32:30, time (data): 1.398 (0.000)] l_pix: 7.3663e-02 
+2025-10-14 04:31:00,960 INFO: Validation RGBNIR_val
+	 # psnr: 24.9273	Best: 24.9276 @ 41000 iter
+	 # ssim: 0.6690	Best: 0.6691 @ 41000 iter
+
+2025-10-14 04:33:20,705 INFO: [PFT_R..][epoch: 35, iter:  44,600, lr:(5.000e-06,)] [eta: 4 days, 18:32:03, time (data): 1.398 (0.000)] l_pix: 5.6578e-02 
+2025-10-14 04:35:40,594 INFO: [PFT_R..][epoch: 35, iter:  44,700, lr:(5.000e-06,)] [eta: 4 days, 18:29:09, time (data): 1.399 (0.000)] l_pix: 6.6150e-02 
+2025-10-14 04:38:00,451 INFO: [PFT_R..][epoch: 35, iter:  44,800, lr:(5.000e-06,)] [eta: 4 days, 18:26:15, time (data): 1.399 (0.000)] l_pix: 7.5684e-02 
+2025-10-14 04:40:20,461 INFO: [PFT_R..][epoch: 35, iter:  44,900, lr:(5.000e-06,)] [eta: 4 days, 18:23:23, time (data): 1.400 (0.000)] l_pix: 6.5061e-02 
+2025-10-14 04:42:40,506 INFO: [PFT_R..][epoch: 35, iter:  45,000, lr:(5.000e-06,)] [eta: 4 days, 18:20:31, time (data): 1.400 (0.000)] l_pix: 6.8147e-02 
+2025-10-14 04:42:40,507 INFO: Saving models and training states.
+2025-10-14 04:43:04,772 INFO: Validation RGBNIR_val
+	 # psnr: 24.9276	Best: 24.9276 @ 41000 iter
+	 # ssim: 0.6690	Best: 0.6691 @ 41000 iter
+
+2025-10-14 04:45:24,746 INFO: [PFT_R..][epoch: 36, iter:  45,100, lr:(5.000e-06,)] [eta: 4 days, 18:20:11, time (data): 1.400 (0.000)] l_pix: 6.3980e-02 
+2025-10-14 04:47:44,657 INFO: [PFT_R..][epoch: 36, iter:  45,200, lr:(5.000e-06,)] [eta: 4 days, 18:17:18, time (data): 1.399 (0.000)] l_pix: 5.9195e-02 
+2025-10-14 04:50:04,316 INFO: [PFT_R..][epoch: 36, iter:  45,300, lr:(5.000e-06,)] [eta: 4 days, 18:14:23, time (data): 1.396 (0.000)] l_pix: 5.8241e-02 
+2025-10-14 04:52:24,190 INFO: [PFT_R..][epoch: 36, iter:  45,400, lr:(5.000e-06,)] [eta: 4 days, 18:11:30, time (data): 1.398 (0.000)] l_pix: 4.9312e-02 
+2025-10-14 04:54:44,152 INFO: [PFT_R..][epoch: 36, iter:  45,500, lr:(5.000e-06,)] [eta: 4 days, 18:08:38, time (data): 1.400 (0.000)] l_pix: 7.5152e-02 
+2025-10-14 04:55:07,059 INFO: Validation RGBNIR_val
+	 # psnr: 24.9281	Best: 24.9281 @ 45500 iter
+	 # ssim: 0.6691	Best: 0.6691 @ 41000 iter
+
+2025-10-14 04:57:26,798 INFO: [PFT_R..][epoch: 36, iter:  45,600, lr:(5.000e-06,)] [eta: 4 days, 18:08:07, time (data): 1.399 (0.000)] l_pix: 8.0614e-02 
+2025-10-14 04:59:46,743 INFO: [PFT_R..][epoch: 36, iter:  45,700, lr:(5.000e-06,)] [eta: 4 days, 18:05:14, time (data): 1.400 (0.000)] l_pix: 4.7361e-02 
+2025-10-14 05:02:06,748 INFO: [PFT_R..][epoch: 36, iter:  45,800, lr:(5.000e-06,)] [eta: 4 days, 18:02:22, time (data): 1.400 (0.000)] l_pix: 4.2972e-02 
+2025-10-14 05:04:26,741 INFO: [PFT_R..][epoch: 36, iter:  45,900, lr:(5.000e-06,)] [eta: 4 days, 17:59:30, time (data): 1.400 (0.000)] l_pix: 6.5064e-02 
+2025-10-14 05:06:46,642 INFO: [PFT_R..][epoch: 36, iter:  46,000, lr:(5.000e-06,)] [eta: 4 days, 17:56:37, time (data): 1.399 (0.000)] l_pix: 5.4189e-02 
+2025-10-14 05:07:09,745 INFO: Validation RGBNIR_val
+	 # psnr: 24.9280	Best: 24.9281 @ 45500 iter
+	 # ssim: 0.6690	Best: 0.6691 @ 41000 iter
+
+2025-10-14 05:09:29,649 INFO: [PFT_R..][epoch: 36, iter:  46,100, lr:(5.000e-06,)] [eta: 4 days, 17:56:07, time (data): 1.399 (0.000)] l_pix: 6.5851e-02 
+2025-10-14 05:11:49,492 INFO: [PFT_R..][epoch: 36, iter:  46,200, lr:(5.000e-06,)] [eta: 4 days, 17:53:14, time (data): 1.399 (0.000)] l_pix: 4.5786e-02 
+2025-10-14 05:14:09,673 INFO: [PFT_R..][epoch: 37, iter:  46,300, lr:(5.000e-06,)] [eta: 4 days, 17:50:24, time (data): 1.401 (0.001)] l_pix: 8.9487e-02 
+2025-10-14 05:16:29,688 INFO: [PFT_R..][epoch: 37, iter:  46,400, lr:(5.000e-06,)] [eta: 4 days, 17:47:32, time (data): 1.401 (0.001)] l_pix: 5.2523e-02 
+2025-10-14 05:18:49,641 INFO: [PFT_R..][epoch: 37, iter:  46,500, lr:(5.000e-06,)] [eta: 4 days, 17:44:40, time (data): 1.399 (0.000)] l_pix: 5.4513e-02 
+2025-10-14 05:19:12,652 INFO: Validation RGBNIR_val
+	 # psnr: 24.9284	Best: 24.9284 @ 46500 iter
+	 # ssim: 0.6691	Best: 0.6691 @ 41000 iter
+
+2025-10-14 05:21:32,430 INFO: [PFT_R..][epoch: 37, iter:  46,600, lr:(5.000e-06,)] [eta: 4 days, 17:44:07, time (data): 1.398 (0.000)] l_pix: 7.4865e-02 
+2025-10-14 05:23:52,395 INFO: [PFT_R..][epoch: 37, iter:  46,700, lr:(5.000e-06,)] [eta: 4 days, 17:41:15, time (data): 1.399 (0.000)] l_pix: 8.1562e-02 
+2025-10-14 05:26:12,318 INFO: [PFT_R..][epoch: 37, iter:  46,800, lr:(5.000e-06,)] [eta: 4 days, 17:38:24, time (data): 1.399 (0.000)] l_pix: 6.5081e-02 
+2025-10-14 05:28:32,316 INFO: [PFT_R..][epoch: 37, iter:  46,900, lr:(5.000e-06,)] [eta: 4 days, 17:35:32, time (data): 1.400 (0.000)] l_pix: 5.9029e-02 
+2025-10-14 05:30:52,234 INFO: [PFT_R..][epoch: 37, iter:  47,000, lr:(5.000e-06,)] [eta: 4 days, 17:32:40, time (data): 1.400 (0.000)] l_pix: 6.6190e-02 
+2025-10-14 05:31:15,279 INFO: Validation RGBNIR_val
+	 # psnr: 24.9284	Best: 24.9284 @ 46500 iter
+	 # ssim: 0.6691	Best: 0.6691 @ 47000 iter
+
+2025-10-14 05:33:35,105 INFO: [PFT_R..][epoch: 37, iter:  47,100, lr:(5.000e-06,)] [eta: 4 days, 17:32:07, time (data): 1.400 (0.000)] l_pix: 8.0312e-02 
+2025-10-14 05:35:55,118 INFO: [PFT_R..][epoch: 37, iter:  47,200, lr:(5.000e-06,)] [eta: 4 days, 17:29:15, time (data): 1.400 (0.000)] l_pix: 5.7876e-02 
+2025-10-14 05:38:15,067 INFO: [PFT_R..][epoch: 37, iter:  47,300, lr:(5.000e-06,)] [eta: 4 days, 17:26:24, time (data): 1.400 (0.000)] l_pix: 6.4212e-02 
+2025-10-14 05:40:34,951 INFO: [PFT_R..][epoch: 37, iter:  47,400, lr:(5.000e-06,)] [eta: 4 days, 17:23:32, time (data): 1.399 (0.000)] l_pix: 6.0812e-02 
+2025-10-14 05:42:54,785 INFO: [PFT_R..][epoch: 37, iter:  47,500, lr:(5.000e-06,)] [eta: 4 days, 17:20:40, time (data): 1.398 (0.000)] l_pix: 6.1582e-02 
+2025-10-14 05:43:17,959 INFO: Validation RGBNIR_val
+	 # psnr: 24.9287	Best: 24.9287 @ 47500 iter
+	 # ssim: 0.6691	Best: 0.6691 @ 47500 iter
+
+2025-10-14 05:45:37,763 INFO: [PFT_R..][epoch: 38, iter:  47,600, lr:(5.000e-06,)] [eta: 4 days, 17:20:06, time (data): 1.398 (0.001)] l_pix: 6.5913e-02 
+2025-10-14 05:47:57,732 INFO: [PFT_R..][epoch: 38, iter:  47,700, lr:(5.000e-06,)] [eta: 4 days, 17:17:15, time (data): 1.399 (0.000)] l_pix: 7.2255e-02 
+2025-10-14 05:50:17,569 INFO: [PFT_R..][epoch: 38, iter:  47,800, lr:(5.000e-06,)] [eta: 4 days, 17:14:23, time (data): 1.398 (0.000)] l_pix: 4.7164e-02 
+2025-10-14 05:52:37,423 INFO: [PFT_R..][epoch: 38, iter:  47,900, lr:(5.000e-06,)] [eta: 4 days, 17:11:31, time (data): 1.399 (0.000)] l_pix: 6.2544e-02 
+2025-10-14 05:54:57,319 INFO: [PFT_R..][epoch: 38, iter:  48,000, lr:(5.000e-06,)] [eta: 4 days, 17:08:40, time (data): 1.399 (0.000)] l_pix: 5.5739e-02 
+2025-10-14 05:55:20,206 INFO: Validation RGBNIR_val
+	 # psnr: 24.9288	Best: 24.9288 @ 48000 iter
+	 # ssim: 0.6691	Best: 0.6691 @ 47500 iter
+
+2025-10-14 05:57:39,995 INFO: [PFT_R..][epoch: 38, iter:  48,100, lr:(5.000e-06,)] [eta: 4 days, 17:08:03, time (data): 1.399 (0.000)] l_pix: 6.1906e-02 
+2025-10-14 05:59:59,890 INFO: [PFT_R..][epoch: 38, iter:  48,200, lr:(5.000e-06,)] [eta: 4 days, 17:05:11, time (data): 1.399 (0.000)] l_pix: 6.0065e-02 
+2025-10-14 06:02:19,986 INFO: [PFT_R..][epoch: 38, iter:  48,300, lr:(5.000e-06,)] [eta: 4 days, 17:02:21, time (data): 1.400 (0.000)] l_pix: 5.8871e-02 
+2025-10-14 06:04:39,949 INFO: [PFT_R..][epoch: 38, iter:  48,400, lr:(5.000e-06,)] [eta: 4 days, 16:59:31, time (data): 1.400 (0.000)] l_pix: 6.5123e-02 
+2025-10-14 06:06:59,856 INFO: [PFT_R..][epoch: 38, iter:  48,500, lr:(5.000e-06,)] [eta: 4 days, 16:56:40, time (data): 1.399 (0.000)] l_pix: 6.5618e-02 
+2025-10-14 06:07:22,901 INFO: Validation RGBNIR_val
+	 # psnr: 24.9287	Best: 24.9288 @ 48000 iter
+	 # ssim: 0.6691	Best: 0.6691 @ 47500 iter
+
+2025-10-14 06:09:42,811 INFO: [PFT_R..][epoch: 38, iter:  48,600, lr:(5.000e-06,)] [eta: 4 days, 16:56:03, time (data): 1.399 (0.000)] l_pix: 6.0173e-02 
+2025-10-14 06:12:02,741 INFO: [PFT_R..][epoch: 38, iter:  48,700, lr:(5.000e-06,)] [eta: 4 days, 16:53:12, time (data): 1.399 (0.000)] l_pix: 6.7993e-02 
+2025-10-14 06:14:22,606 INFO: [PFT_R..][epoch: 39, iter:  48,800, lr:(5.000e-06,)] [eta: 4 days, 16:50:21, time (data): 1.399 (0.001)] l_pix: 7.9588e-02 
+2025-10-14 06:16:42,525 INFO: [PFT_R..][epoch: 39, iter:  48,900, lr:(5.000e-06,)] [eta: 4 days, 16:47:30, time (data): 1.399 (0.000)] l_pix: 7.0187e-02 
+2025-10-14 06:19:02,396 INFO: [PFT_R..][epoch: 39, iter:  49,000, lr:(5.000e-06,)] [eta: 4 days, 16:44:40, time (data): 1.399 (0.000)] l_pix: 5.7668e-02 
+2025-10-14 06:19:25,357 INFO: Validation RGBNIR_val
+	 # psnr: 24.9285	Best: 24.9288 @ 48000 iter
+	 # ssim: 0.6691	Best: 0.6691 @ 47500 iter
+
+2025-10-14 06:21:45,164 INFO: [PFT_R..][epoch: 39, iter:  49,100, lr:(5.000e-06,)] [eta: 4 days, 16:44:00, time (data): 1.398 (0.000)] l_pix: 5.5188e-02 
+2025-10-14 06:24:05,104 INFO: [PFT_R..][epoch: 39, iter:  49,200, lr:(5.000e-06,)] [eta: 4 days, 16:41:10, time (data): 1.399 (0.000)] l_pix: 6.2200e-02 
+2025-10-14 06:26:25,088 INFO: [PFT_R..][epoch: 39, iter:  49,300, lr:(5.000e-06,)] [eta: 4 days, 16:38:20, time (data): 1.400 (0.000)] l_pix: 4.9787e-02 
+2025-10-14 06:28:45,153 INFO: [PFT_R..][epoch: 39, iter:  49,400, lr:(5.000e-06,)] [eta: 4 days, 16:35:30, time (data): 1.400 (0.000)] l_pix: 5.9242e-02 
+2025-10-14 06:31:05,153 INFO: [PFT_R..][epoch: 39, iter:  49,500, lr:(5.000e-06,)] [eta: 4 days, 16:32:40, time (data): 1.399 (0.000)] l_pix: 7.8184e-02 
+2025-10-14 06:31:28,155 INFO: Validation RGBNIR_val
+	 # psnr: 24.9286	Best: 24.9288 @ 48000 iter
+	 # ssim: 0.6690	Best: 0.6691 @ 47500 iter
+
+2025-10-14 06:33:47,791 INFO: [PFT_R..][epoch: 39, iter:  49,600, lr:(5.000e-06,)] [eta: 4 days, 16:31:59, time (data): 1.397 (0.000)] l_pix: 6.9525e-02 
+2025-10-14 06:36:07,817 INFO: [PFT_R..][epoch: 39, iter:  49,700, lr:(5.000e-06,)] [eta: 4 days, 16:29:09, time (data): 1.401 (0.000)] l_pix: 8.1815e-02 
+2025-10-14 06:38:27,771 INFO: [PFT_R..][epoch: 39, iter:  49,800, lr:(5.000e-06,)] [eta: 4 days, 16:26:19, time (data): 1.400 (0.000)] l_pix: 4.4030e-02 
+2025-10-14 06:40:47,673 INFO: [PFT_R..][epoch: 39, iter:  49,900, lr:(5.000e-06,)] [eta: 4 days, 16:23:29, time (data): 1.398 (0.000)] l_pix: 8.7039e-02 
+2025-10-14 06:43:07,419 INFO: [PFT_R..][epoch: 39, iter:  50,000, lr:(5.000e-06,)] [eta: 4 days, 16:20:39, time (data): 1.398 (0.000)] l_pix: 5.5962e-02 
+2025-10-14 06:43:07,419 INFO: Saving models and training states.
+2025-10-14 06:43:31,683 INFO: Validation RGBNIR_val
+	 # psnr: 24.9286	Best: 24.9288 @ 48000 iter
+	 # ssim: 0.6690	Best: 0.6691 @ 47500 iter
+
+2025-10-14 06:45:51,708 INFO: [PFT_R..][epoch: 40, iter:  50,100, lr:(5.000e-06,)] [eta: 4 days, 16:20:05, time (data): 1.400 (0.000)] l_pix: 4.9063e-02 
+2025-10-14 06:48:11,697 INFO: [PFT_R..][epoch: 40, iter:  50,200, lr:(5.000e-06,)] [eta: 4 days, 16:17:15, time (data): 1.400 (0.000)] l_pix: 4.9844e-02 
+2025-10-14 06:50:31,698 INFO: [PFT_R..][epoch: 40, iter:  50,300, lr:(5.000e-06,)] [eta: 4 days, 16:14:26, time (data): 1.399 (0.000)] l_pix: 5.4569e-02 
+2025-10-14 06:52:51,394 INFO: [PFT_R..][epoch: 40, iter:  50,400, lr:(5.000e-06,)] [eta: 4 days, 16:11:35, time (data): 1.398 (0.000)] l_pix: 6.2012e-02 
+2025-10-14 06:55:11,400 INFO: [PFT_R..][epoch: 40, iter:  50,500, lr:(5.000e-06,)] [eta: 4 days, 16:08:46, time (data): 1.400 (0.000)] l_pix: 6.6996e-02 
+2025-10-14 06:55:34,223 INFO: Validation RGBNIR_val
+	 # psnr: 24.9285	Best: 24.9288 @ 48000 iter
+	 # ssim: 0.6691	Best: 0.6691 @ 47500 iter
+
+2025-10-14 06:57:54,007 INFO: [PFT_R..][epoch: 40, iter:  50,600, lr:(5.000e-06,)] [eta: 4 days, 16:08:02, time (data): 1.398 (0.000)] l_pix: 5.3425e-02 
+2025-10-14 07:00:13,916 INFO: [PFT_R..][epoch: 40, iter:  50,700, lr:(5.000e-06,)] [eta: 4 days, 16:05:12, time (data): 1.399 (0.000)] l_pix: 5.2219e-02 
+2025-10-14 07:02:33,720 INFO: [PFT_R..][epoch: 40, iter:  50,800, lr:(5.000e-06,)] [eta: 4 days, 16:02:22, time (data): 1.398 (0.000)] l_pix: 9.7947e-02 
+2025-10-14 07:04:53,458 INFO: [PFT_R..][epoch: 40, iter:  50,900, lr:(5.000e-06,)] [eta: 4 days, 15:59:32, time (data): 1.396 (0.000)] l_pix: 6.2700e-02 
+2025-10-14 07:07:13,255 INFO: [PFT_R..][epoch: 40, iter:  51,000, lr:(5.000e-06,)] [eta: 4 days, 15:56:42, time (data): 1.397 (0.000)] l_pix: 6.2730e-02 
+2025-10-14 07:07:36,250 INFO: Validation RGBNIR_val
+	 # psnr: 24.9285	Best: 24.9288 @ 48000 iter
+	 # ssim: 0.6690	Best: 0.6691 @ 47500 iter
+
+2025-10-14 07:09:55,896 INFO: [PFT_R..][epoch: 40, iter:  51,100, lr:(5.000e-06,)] [eta: 4 days, 15:55:57, time (data): 1.399 (0.000)] l_pix: 6.9622e-02 
+2025-10-14 07:12:15,884 INFO: [PFT_R..][epoch: 40, iter:  51,200, lr:(5.000e-06,)] [eta: 4 days, 15:53:08, time (data): 1.399 (0.000)] l_pix: 5.3818e-02 
+2025-10-14 07:14:35,956 INFO: [PFT_R..][epoch: 41, iter:  51,300, lr:(5.000e-06,)] [eta: 4 days, 15:50:19, time (data): 1.398 (0.000)] l_pix: 9.2836e-02 
+2025-10-14 07:16:55,948 INFO: [PFT_R..][epoch: 41, iter:  51,400, lr:(5.000e-06,)] [eta: 4 days, 15:47:31, time (data): 1.399 (0.000)] l_pix: 5.1835e-02 
+2025-10-14 07:19:15,804 INFO: [PFT_R..][epoch: 41, iter:  51,500, lr:(5.000e-06,)] [eta: 4 days, 15:44:41, time (data): 1.400 (0.000)] l_pix: 6.0062e-02 
+2025-10-14 07:19:38,887 INFO: Validation RGBNIR_val
+	 # psnr: 24.9285	Best: 24.9288 @ 48000 iter
+	 # ssim: 0.6690	Best: 0.6691 @ 47500 iter
+
+2025-10-14 07:21:58,800 INFO: [PFT_R..][epoch: 41, iter:  51,600, lr:(5.000e-06,)] [eta: 4 days, 15:43:57, time (data): 1.399 (0.000)] l_pix: 6.3832e-02 
+2025-10-14 07:24:18,616 INFO: [PFT_R..][epoch: 41, iter:  51,700, lr:(5.000e-06,)] [eta: 4 days, 15:41:07, time (data): 1.398 (0.000)] l_pix: 5.8199e-02 
+2025-10-14 07:26:38,603 INFO: [PFT_R..][epoch: 41, iter:  51,800, lr:(5.000e-06,)] [eta: 4 days, 15:38:19, time (data): 1.399 (0.000)] l_pix: 4.6289e-02 
+2025-10-14 07:28:58,410 INFO: [PFT_R..][epoch: 41, iter:  51,900, lr:(5.000e-06,)] [eta: 4 days, 15:35:29, time (data): 1.399 (0.000)] l_pix: 6.3157e-02 
+2025-10-14 07:31:18,189 INFO: [PFT_R..][epoch: 41, iter:  52,000, lr:(5.000e-06,)] [eta: 4 days, 15:32:40, time (data): 1.398 (0.000)] l_pix: 5.7693e-02 
+2025-10-14 07:31:41,257 INFO: Validation RGBNIR_val
+	 # psnr: 24.9289	Best: 24.9289 @ 52000 iter
+	 # ssim: 0.6691	Best: 0.6691 @ 47500 iter
+
+2025-10-14 07:34:00,934 INFO: [PFT_R..][epoch: 41, iter:  52,100, lr:(5.000e-06,)] [eta: 4 days, 15:31:53, time (data): 1.398 (0.000)] l_pix: 5.8432e-02 
+2025-10-14 07:36:20,870 INFO: [PFT_R..][epoch: 41, iter:  52,200, lr:(5.000e-06,)] [eta: 4 days, 15:29:04, time (data): 1.399 (0.000)] l_pix: 7.5638e-02 
+2025-10-14 07:38:40,747 INFO: [PFT_R..][epoch: 41, iter:  52,300, lr:(5.000e-06,)] [eta: 4 days, 15:26:15, time (data): 1.400 (0.000)] l_pix: 5.6326e-02 
+2025-10-14 07:41:00,787 INFO: [PFT_R..][epoch: 41, iter:  52,400, lr:(5.000e-06,)] [eta: 4 days, 15:23:28, time (data): 1.400 (0.000)] l_pix: 5.8315e-02 
+2025-10-14 07:43:20,643 INFO: [PFT_R..][epoch: 41, iter:  52,500, lr:(5.000e-06,)] [eta: 4 days, 15:20:39, time (data): 1.400 (0.000)] l_pix: 7.0861e-02 
+2025-10-14 07:43:43,831 INFO: Validation RGBNIR_val
+	 # psnr: 24.9287	Best: 24.9289 @ 52000 iter
+	 # ssim: 0.6690	Best: 0.6691 @ 47500 iter
+
+2025-10-14 07:46:03,642 INFO: [PFT_R..][epoch: 42, iter:  52,600, lr:(5.000e-06,)] [eta: 4 days, 15:19:52, time (data): 1.399 (0.001)] l_pix: 5.4869e-02 
+2025-10-14 07:48:23,605 INFO: [PFT_R..][epoch: 42, iter:  52,700, lr:(5.000e-06,)] [eta: 4 days, 15:17:04, time (data): 1.402 (0.000)] l_pix: 7.1774e-02 
+2025-10-14 07:50:43,704 INFO: [PFT_R..][epoch: 42, iter:  52,800, lr:(5.000e-06,)] [eta: 4 days, 15:14:16, time (data): 1.401 (0.000)] l_pix: 5.8626e-02 
+2025-10-14 07:53:03,482 INFO: [PFT_R..][epoch: 42, iter:  52,900, lr:(5.000e-06,)] [eta: 4 days, 15:11:27, time (data): 1.399 (0.000)] l_pix: 4.8065e-02 
+2025-10-14 07:55:23,405 INFO: [PFT_R..][epoch: 42, iter:  53,000, lr:(5.000e-06,)] [eta: 4 days, 15:08:39, time (data): 1.399 (0.000)] l_pix: 6.7925e-02 
+2025-10-14 07:55:46,350 INFO: Validation RGBNIR_val
+	 # psnr: 24.9284	Best: 24.9289 @ 52000 iter
+	 # ssim: 0.6690	Best: 0.6691 @ 47500 iter
+
+2025-10-14 07:58:06,176 INFO: [PFT_R..][epoch: 42, iter:  53,100, lr:(5.000e-06,)] [eta: 4 days, 15:07:50, time (data): 1.397 (0.000)] l_pix: 6.7646e-02 
+2025-10-14 08:00:26,031 INFO: [PFT_R..][epoch: 42, iter:  53,200, lr:(5.000e-06,)] [eta: 4 days, 15:05:02, time (data): 1.398 (0.000)] l_pix: 6.0413e-02 
+2025-10-14 08:02:46,027 INFO: [PFT_R..][epoch: 42, iter:  53,300, lr:(5.000e-06,)] [eta: 4 days, 15:02:14, time (data): 1.401 (0.000)] l_pix: 6.2846e-02 
+2025-10-14 08:05:05,897 INFO: [PFT_R..][epoch: 42, iter:  53,400, lr:(5.000e-06,)] [eta: 4 days, 14:59:26, time (data): 1.399 (0.000)] l_pix: 7.0753e-02 
+2025-10-14 08:07:25,869 INFO: [PFT_R..][epoch: 42, iter:  53,500, lr:(5.000e-06,)] [eta: 4 days, 14:56:38, time (data): 1.399 (0.000)] l_pix: 6.1583e-02 
+2025-10-14 08:07:49,069 INFO: Validation RGBNIR_val
+	 # psnr: 24.9289	Best: 24.9289 @ 53500 iter
+	 # ssim: 0.6690	Best: 0.6691 @ 47500 iter
+
+2025-10-14 08:10:08,686 INFO: [PFT_R..][epoch: 42, iter:  53,600, lr:(5.000e-06,)] [eta: 4 days, 14:55:49, time (data): 1.397 (0.000)] l_pix: 5.8682e-02 
+2025-10-14 08:12:28,466 INFO: [PFT_R..][epoch: 42, iter:  53,700, lr:(5.000e-06,)] [eta: 4 days, 14:53:00, time (data): 1.398 (0.000)] l_pix: 6.4172e-02 
+2025-10-14 08:14:48,596 INFO: [PFT_R..][epoch: 43, iter:  53,800, lr:(5.000e-06,)] [eta: 4 days, 14:50:13, time (data): 1.400 (0.001)] l_pix: 4.6533e-02 
+2025-10-14 08:17:08,502 INFO: [PFT_R..][epoch: 43, iter:  53,900, lr:(5.000e-06,)] [eta: 4 days, 14:47:25, time (data): 1.398 (0.000)] l_pix: 6.0775e-02 
+2025-10-14 08:19:28,367 INFO: [PFT_R..][epoch: 43, iter:  54,000, lr:(5.000e-06,)] [eta: 4 days, 14:44:37, time (data): 1.398 (0.000)] l_pix: 6.1113e-02 
+2025-10-14 08:19:51,356 INFO: Validation RGBNIR_val
+	 # psnr: 24.9293	Best: 24.9293 @ 54000 iter
+	 # ssim: 0.6691	Best: 0.6691 @ 47500 iter
+
+2025-10-14 08:22:11,147 INFO: [PFT_R..][epoch: 43, iter:  54,100, lr:(5.000e-06,)] [eta: 4 days, 14:43:46, time (data): 1.399 (0.000)] l_pix: 5.7171e-02 
+2025-10-14 08:24:31,084 INFO: [PFT_R..][epoch: 43, iter:  54,200, lr:(5.000e-06,)] [eta: 4 days, 14:40:59, time (data): 1.399 (0.000)] l_pix: 7.6871e-02 
+2025-10-14 08:26:51,097 INFO: [PFT_R..][epoch: 43, iter:  54,300, lr:(5.000e-06,)] [eta: 4 days, 14:38:12, time (data): 1.400 (0.000)] l_pix: 6.1539e-02 
+2025-10-14 08:29:11,002 INFO: [PFT_R..][epoch: 43, iter:  54,400, lr:(5.000e-06,)] [eta: 4 days, 14:35:24, time (data): 1.399 (0.000)] l_pix: 5.3097e-02 
+2025-10-14 08:31:30,990 INFO: [PFT_R..][epoch: 43, iter:  54,500, lr:(5.000e-06,)] [eta: 4 days, 14:32:37, time (data): 1.399 (0.000)] l_pix: 3.5436e-02 
+2025-10-14 08:31:54,159 INFO: Validation RGBNIR_val
+	 # psnr: 24.9293	Best: 24.9293 @ 54000 iter
+	 # ssim: 0.6691	Best: 0.6691 @ 47500 iter
+
+2025-10-14 08:34:14,003 INFO: [PFT_R..][epoch: 43, iter:  54,600, lr:(5.000e-06,)] [eta: 4 days, 14:31:46, time (data): 1.398 (0.000)] l_pix: 4.9971e-02 
+2025-10-14 08:36:33,933 INFO: [PFT_R..][epoch: 43, iter:  54,700, lr:(5.000e-06,)] [eta: 4 days, 14:28:59, time (data): 1.397 (0.001)] l_pix: 5.3898e-02 
+2025-10-14 08:38:53,776 INFO: [PFT_R..][epoch: 43, iter:  54,800, lr:(5.000e-06,)] [eta: 4 days, 14:26:11, time (data): 1.398 (0.000)] l_pix: 7.0686e-02 
+2025-10-14 08:41:13,451 INFO: [PFT_R..][epoch: 43, iter:  54,900, lr:(5.000e-06,)] [eta: 4 days, 14:23:23, time (data): 1.398 (0.000)] l_pix: 5.9125e-02 
+2025-10-14 08:43:33,150 INFO: [PFT_R..][epoch: 43, iter:  55,000, lr:(5.000e-06,)] [eta: 4 days, 14:20:34, time (data): 1.397 (0.000)] l_pix: 6.3551e-02 
+2025-10-14 08:43:33,150 INFO: Saving models and training states.
+2025-10-14 08:43:57,365 INFO: Validation RGBNIR_val
+	 # psnr: 24.9294	Best: 24.9294 @ 55000 iter
+	 # ssim: 0.6691	Best: 0.6691 @ 47500 iter
+
+2025-10-14 08:46:16,967 INFO: [PFT_R..][epoch: 44, iter:  55,100, lr:(5.000e-06,)] [eta: 4 days, 14:19:46, time (data): 1.399 (0.000)] l_pix: 6.8564e-02 
+2025-10-14 08:48:36,752 INFO: [PFT_R..][epoch: 44, iter:  55,200, lr:(5.000e-06,)] [eta: 4 days, 14:16:59, time (data): 1.398 (0.000)] l_pix: 6.2341e-02 
+2025-10-14 08:50:56,598 INFO: [PFT_R..][epoch: 44, iter:  55,300, lr:(5.000e-06,)] [eta: 4 days, 14:14:11, time (data): 1.400 (0.000)] l_pix: 5.3817e-02 
+2025-10-14 08:53:16,508 INFO: [PFT_R..][epoch: 44, iter:  55,400, lr:(5.000e-06,)] [eta: 4 days, 14:11:24, time (data): 1.399 (0.000)] l_pix: 4.5190e-02 
+2025-10-14 08:55:36,508 INFO: [PFT_R..][epoch: 44, iter:  55,500, lr:(5.000e-06,)] [eta: 4 days, 14:08:38, time (data): 1.400 (0.000)] l_pix: 5.4012e-02 
+2025-10-14 08:55:59,442 INFO: Validation RGBNIR_val
+	 # psnr: 24.9294	Best: 24.9294 @ 55000 iter
+	 # ssim: 0.6690	Best: 0.6691 @ 47500 iter
+
+2025-10-14 08:58:19,180 INFO: [PFT_R..][epoch: 44, iter:  55,600, lr:(5.000e-06,)] [eta: 4 days, 14:07:43, time (data): 1.398 (0.000)] l_pix: 6.3238e-02 
+2025-10-14 09:00:39,043 INFO: [PFT_R..][epoch: 44, iter:  55,700, lr:(5.000e-06,)] [eta: 4 days, 14:04:56, time (data): 1.399 (0.000)] l_pix: 4.8135e-02 
+2025-10-14 09:02:58,816 INFO: [PFT_R..][epoch: 44, iter:  55,800, lr:(5.000e-06,)] [eta: 4 days, 14:02:08, time (data): 1.398 (0.000)] l_pix: 7.3447e-02 
+2025-10-14 09:05:18,639 INFO: [PFT_R..][epoch: 44, iter:  55,900, lr:(5.000e-06,)] [eta: 4 days, 13:59:21, time (data): 1.399 (0.000)] l_pix: 5.5621e-02 
+2025-10-14 09:07:38,549 INFO: [PFT_R..][epoch: 44, iter:  56,000, lr:(5.000e-06,)] [eta: 4 days, 13:56:34, time (data): 1.399 (0.000)] l_pix: 5.2343e-02 
+2025-10-14 09:08:01,670 INFO: Validation RGBNIR_val
+	 # psnr: 24.9293	Best: 24.9294 @ 55000 iter
+	 # ssim: 0.6690	Best: 0.6691 @ 47500 iter
+
+2025-10-14 09:10:21,628 INFO: [PFT_R..][epoch: 44, iter:  56,100, lr:(5.000e-06,)] [eta: 4 days, 13:55:41, time (data): 1.401 (0.000)] l_pix: 5.9127e-02 
+2025-10-14 09:12:41,598 INFO: [PFT_R..][epoch: 44, iter:  56,200, lr:(5.000e-06,)] [eta: 4 days, 13:52:54, time (data): 1.400 (0.000)] l_pix: 4.4489e-02 
+2025-10-14 09:15:01,555 INFO: [PFT_R..][epoch: 45, iter:  56,300, lr:(5.000e-06,)] [eta: 4 days, 13:50:08, time (data): 1.401 (0.000)] l_pix: 5.1084e-02 
+2025-10-14 09:17:21,418 INFO: [PFT_R..][epoch: 45, iter:  56,400, lr:(5.000e-06,)] [eta: 4 days, 13:47:21, time (data): 1.399 (0.000)] l_pix: 5.6526e-02 
+2025-10-14 09:19:41,331 INFO: [PFT_R..][epoch: 45, iter:  56,500, lr:(5.000e-06,)] [eta: 4 days, 13:44:34, time (data): 1.401 (0.000)] l_pix: 5.1592e-02 
+2025-10-14 09:20:04,356 INFO: Validation RGBNIR_val
+	 # psnr: 24.9295	Best: 24.9295 @ 56500 iter
+	 # ssim: 0.6690	Best: 0.6691 @ 47500 iter
+
+2025-10-14 09:22:24,116 INFO: [PFT_R..][epoch: 45, iter:  56,600, lr:(5.000e-06,)] [eta: 4 days, 13:43:39, time (data): 1.398 (0.000)] l_pix: 4.7744e-02 
+2025-10-14 09:24:44,022 INFO: [PFT_R..][epoch: 45, iter:  56,700, lr:(5.000e-06,)] [eta: 4 days, 13:40:52, time (data): 1.394 (0.000)] l_pix: 5.7052e-02 
+2025-10-14 09:27:04,022 INFO: [PFT_R..][epoch: 45, iter:  56,800, lr:(5.000e-06,)] [eta: 4 days, 13:38:06, time (data): 1.399 (0.000)] l_pix: 4.2556e-02 
+2025-10-14 09:29:23,951 INFO: [PFT_R..][epoch: 45, iter:  56,900, lr:(5.000e-06,)] [eta: 4 days, 13:35:20, time (data): 1.400 (0.000)] l_pix: 5.2488e-02 
+2025-10-14 09:31:43,512 INFO: [PFT_R..][epoch: 45, iter:  57,000, lr:(5.000e-06,)] [eta: 4 days, 13:32:32, time (data): 1.396 (0.000)] l_pix: 5.0524e-02 
+2025-10-14 09:32:06,573 INFO: Validation RGBNIR_val
+	 # psnr: 24.9298	Best: 24.9298 @ 57000 iter
+	 # ssim: 0.6691	Best: 0.6691 @ 47500 iter
+
+2025-10-14 09:34:26,305 INFO: [PFT_R..][epoch: 45, iter:  57,100, lr:(5.000e-06,)] [eta: 4 days, 13:31:35, time (data): 1.391 (0.000)] l_pix: 6.4127e-02 
+2025-10-14 09:36:46,114 INFO: [PFT_R..][epoch: 45, iter:  57,200, lr:(5.000e-06,)] [eta: 4 days, 13:28:48, time (data): 1.397 (0.000)] l_pix: 3.9567e-02 
+2025-10-14 09:39:06,097 INFO: [PFT_R..][epoch: 45, iter:  57,300, lr:(5.000e-06,)] [eta: 4 days, 13:26:02, time (data): 1.403 (0.000)] l_pix: 7.9861e-02 
+2025-10-14 09:41:26,125 INFO: [PFT_R..][epoch: 45, iter:  57,400, lr:(5.000e-06,)] [eta: 4 days, 13:23:17, time (data): 1.401 (0.000)] l_pix: 5.7357e-02 
+2025-10-14 09:43:45,997 INFO: [PFT_R..][epoch: 45, iter:  57,500, lr:(5.000e-06,)] [eta: 4 days, 13:20:31, time (data): 1.398 (0.000)] l_pix: 3.8211e-02 
+2025-10-14 09:44:09,166 INFO: Validation RGBNIR_val
+	 # psnr: 24.9298	Best: 24.9298 @ 57500 iter
+	 # ssim: 0.6691	Best: 0.6691 @ 57500 iter
+
+2025-10-14 09:46:28,987 INFO: [PFT_R..][epoch: 46, iter:  57,600, lr:(5.000e-06,)] [eta: 4 days, 13:19:34, time (data): 1.398 (0.001)] l_pix: 6.4650e-02 
+2025-10-14 09:48:48,815 INFO: [PFT_R..][epoch: 46, iter:  57,700, lr:(5.000e-06,)] [eta: 4 days, 13:16:47, time (data): 1.400 (0.000)] l_pix: 6.5914e-02 
+2025-10-14 09:51:08,817 INFO: [PFT_R..][epoch: 46, iter:  57,800, lr:(5.000e-06,)] [eta: 4 days, 13:14:02, time (data): 1.400 (0.000)] l_pix: 6.0532e-02 
+2025-10-14 09:53:28,691 INFO: [PFT_R..][epoch: 46, iter:  57,900, lr:(5.000e-06,)] [eta: 4 days, 13:11:16, time (data): 1.399 (0.000)] l_pix: 5.2271e-02 
+2025-10-14 09:55:48,717 INFO: [PFT_R..][epoch: 46, iter:  58,000, lr:(5.000e-06,)] [eta: 4 days, 13:08:31, time (data): 1.400 (0.000)] l_pix: 6.6910e-02 
+2025-10-14 09:56:11,562 INFO: Validation RGBNIR_val
+	 # psnr: 24.9299	Best: 24.9299 @ 58000 iter
+	 # ssim: 0.6691	Best: 0.6691 @ 58000 iter
+
+2025-10-14 09:58:31,492 INFO: [PFT_R..][epoch: 46, iter:  58,100, lr:(5.000e-06,)] [eta: 4 days, 13:07:32, time (data): 1.395 (0.000)] l_pix: 5.2348e-02 
+2025-10-14 10:00:51,446 INFO: [PFT_R..][epoch: 46, iter:  58,200, lr:(5.000e-06,)] [eta: 4 days, 13:04:46, time (data): 1.399 (0.000)] l_pix: 8.8178e-02 
+2025-10-14 10:03:11,198 INFO: [PFT_R..][epoch: 46, iter:  58,300, lr:(5.000e-06,)] [eta: 4 days, 13:02:00, time (data): 1.396 (0.001)] l_pix: 6.8473e-02 
+2025-10-14 10:05:30,986 INFO: [PFT_R..][epoch: 46, iter:  58,400, lr:(5.000e-06,)] [eta: 4 days, 12:59:13, time (data): 1.398 (0.000)] l_pix: 7.1267e-02 
+2025-10-14 10:07:50,883 INFO: [PFT_R..][epoch: 46, iter:  58,500, lr:(5.000e-06,)] [eta: 4 days, 12:56:28, time (data): 1.404 (0.000)] l_pix: 5.9118e-02 
+2025-10-14 10:08:13,981 INFO: Validation RGBNIR_val
+	 # psnr: 24.9307	Best: 24.9307 @ 58500 iter
+	 # ssim: 0.6691	Best: 0.6691 @ 58500 iter
+
+2025-10-14 10:10:33,740 INFO: [PFT_R..][epoch: 46, iter:  58,600, lr:(5.000e-06,)] [eta: 4 days, 12:55:29, time (data): 1.398 (0.000)] l_pix: 7.6442e-02 
+2025-10-14 10:12:53,668 INFO: [PFT_R..][epoch: 46, iter:  58,700, lr:(5.000e-06,)] [eta: 4 days, 12:52:43, time (data): 1.399 (0.000)] l_pix: 4.6470e-02 
+2025-10-14 10:15:13,561 INFO: [PFT_R..][epoch: 47, iter:  58,800, lr:(5.000e-06,)] [eta: 4 days, 12:49:57, time (data): 1.399 (0.001)] l_pix: 4.2048e-02 
+2025-10-14 10:17:33,507 INFO: [PFT_R..][epoch: 47, iter:  58,900, lr:(5.000e-06,)] [eta: 4 days, 12:47:12, time (data): 1.396 (0.000)] l_pix: 7.3965e-02 
+2025-10-14 10:19:53,348 INFO: [PFT_R..][epoch: 47, iter:  59,000, lr:(5.000e-06,)] [eta: 4 days, 12:44:26, time (data): 1.398 (0.000)] l_pix: 5.4420e-02 
+2025-10-14 10:20:16,223 INFO: Validation RGBNIR_val
+	 # psnr: 24.9306	Best: 24.9307 @ 58500 iter
+	 # ssim: 0.6691	Best: 0.6691 @ 59000 iter
+
+2025-10-14 10:22:35,839 INFO: [PFT_R..][epoch: 47, iter:  59,100, lr:(5.000e-06,)] [eta: 4 days, 12:43:25, time (data): 1.402 (0.000)] l_pix: 6.0633e-02 
+2025-10-14 10:24:55,469 INFO: [PFT_R..][epoch: 47, iter:  59,200, lr:(5.000e-06,)] [eta: 4 days, 12:40:38, time (data): 1.397 (0.000)] l_pix: 6.2212e-02 
+2025-10-14 10:27:15,319 INFO: [PFT_R..][epoch: 47, iter:  59,300, lr:(5.000e-06,)] [eta: 4 days, 12:37:52, time (data): 1.400 (0.000)] l_pix: 6.7330e-02 
+2025-10-14 10:29:35,197 INFO: [PFT_R..][epoch: 47, iter:  59,400, lr:(5.000e-06,)] [eta: 4 days, 12:35:07, time (data): 1.399 (0.000)] l_pix: 7.9551e-02 
+2025-10-14 10:31:55,007 INFO: [PFT_R..][epoch: 47, iter:  59,500, lr:(5.000e-06,)] [eta: 4 days, 12:32:21, time (data): 1.401 (0.000)] l_pix: 5.2700e-02 
+2025-10-14 10:32:18,090 INFO: Validation RGBNIR_val
+	 # psnr: 24.9309	Best: 24.9309 @ 59500 iter
+	 # ssim: 0.6692	Best: 0.6692 @ 59500 iter
+
+2025-10-14 10:34:37,866 INFO: [PFT_R..][epoch: 47, iter:  59,600, lr:(5.000e-06,)] [eta: 4 days, 12:31:21, time (data): 1.398 (0.000)] l_pix: 6.6206e-02 
+2025-10-14 10:36:57,736 INFO: [PFT_R..][epoch: 47, iter:  59,700, lr:(5.000e-06,)] [eta: 4 days, 12:28:35, time (data): 1.383 (0.000)] l_pix: 5.0814e-02 
+2025-10-14 10:39:17,677 INFO: [PFT_R..][epoch: 47, iter:  59,800, lr:(5.000e-06,)] [eta: 4 days, 12:25:50, time (data): 1.399 (0.000)] l_pix: 5.3846e-02 
+2025-10-14 10:41:37,698 INFO: [PFT_R..][epoch: 47, iter:  59,900, lr:(5.000e-06,)] [eta: 4 days, 12:23:06, time (data): 1.397 (0.000)] l_pix: 7.5935e-02 
+2025-10-14 10:43:57,750 INFO: [PFT_R..][epoch: 47, iter:  60,000, lr:(5.000e-06,)] [eta: 4 days, 12:20:21, time (data): 1.400 (0.000)] l_pix: 7.2388e-02 
+2025-10-14 10:43:57,750 INFO: Saving models and training states.
+2025-10-14 10:44:22,010 INFO: Validation RGBNIR_val
+	 # psnr: 24.9310	Best: 24.9310 @ 60000 iter
+	 # ssim: 0.6692	Best: 0.6692 @ 60000 iter
+
+2025-10-14 10:46:42,012 INFO: [PFT_R..][epoch: 48, iter:  60,100, lr:(5.000e-06,)] [eta: 4 days, 12:19:26, time (data): 1.403 (0.000)] l_pix: 7.0722e-02 
+2025-10-14 10:49:01,913 INFO: [PFT_R..][epoch: 48, iter:  60,200, lr:(5.000e-06,)] [eta: 4 days, 12:16:41, time (data): 1.399 (0.000)] l_pix: 7.0212e-02 
+2025-10-14 10:51:21,923 INFO: [PFT_R..][epoch: 48, iter:  60,300, lr:(5.000e-06,)] [eta: 4 days, 12:13:56, time (data): 1.400 (0.000)] l_pix: 6.0375e-02 
+2025-10-14 10:53:42,000 INFO: [PFT_R..][epoch: 48, iter:  60,400, lr:(5.000e-06,)] [eta: 4 days, 12:11:12, time (data): 1.401 (0.000)] l_pix: 6.3099e-02 
+2025-10-14 10:56:02,112 INFO: [PFT_R..][epoch: 48, iter:  60,500, lr:(5.000e-06,)] [eta: 4 days, 12:08:28, time (data): 1.401 (0.000)] l_pix: 4.7373e-02 
+2025-10-14 10:56:24,982 INFO: Validation RGBNIR_val
+	 # psnr: 24.9312	Best: 24.9312 @ 60500 iter
+	 # ssim: 0.6692	Best: 0.6692 @ 60500 iter
+
+2025-10-14 10:58:44,821 INFO: [PFT_R..][epoch: 48, iter:  60,600, lr:(5.000e-06,)] [eta: 4 days, 12:07:25, time (data): 1.398 (0.000)] l_pix: 5.4567e-02 
+2025-10-14 11:01:04,580 INFO: [PFT_R..][epoch: 48, iter:  60,700, lr:(5.000e-06,)] [eta: 4 days, 12:04:40, time (data): 1.398 (0.000)] l_pix: 6.9129e-02 
+2025-10-14 11:03:24,422 INFO: [PFT_R..][epoch: 48, iter:  60,800, lr:(5.000e-06,)] [eta: 4 days, 12:01:55, time (data): 1.398 (0.000)] l_pix: 7.6303e-02 
+2025-10-14 11:05:44,359 INFO: [PFT_R..][epoch: 48, iter:  60,900, lr:(5.000e-06,)] [eta: 4 days, 11:59:10, time (data): 1.399 (0.000)] l_pix: 4.6992e-02 
+2025-10-14 11:08:04,326 INFO: [PFT_R..][epoch: 48, iter:  61,000, lr:(5.000e-06,)] [eta: 4 days, 11:56:26, time (data): 1.400 (0.000)] l_pix: 6.7047e-02 
+2025-10-14 11:08:27,335 INFO: Validation RGBNIR_val
+	 # psnr: 24.9315	Best: 24.9315 @ 61000 iter
+	 # ssim: 0.6692	Best: 0.6692 @ 61000 iter
+
+2025-10-14 11:10:47,043 INFO: [PFT_R..][epoch: 48, iter:  61,100, lr:(5.000e-06,)] [eta: 4 days, 11:55:22, time (data): 1.398 (0.000)] l_pix: 7.5420e-02 
+2025-10-14 11:13:06,794 INFO: [PFT_R..][epoch: 48, iter:  61,200, lr:(5.000e-06,)] [eta: 4 days, 11:52:36, time (data): 1.398 (0.000)] l_pix: 8.6242e-02 
+2025-10-14 11:15:26,682 INFO: [PFT_R..][epoch: 49, iter:  61,300, lr:(5.000e-06,)] [eta: 4 days, 11:49:52, time (data): 1.398 (0.001)] l_pix: 4.7350e-02 
+2025-10-14 11:17:46,580 INFO: [PFT_R..][epoch: 49, iter:  61,400, lr:(5.000e-06,)] [eta: 4 days, 11:47:07, time (data): 1.399 (0.000)] l_pix: 7.5957e-02 
+2025-10-14 11:20:06,592 INFO: [PFT_R..][epoch: 49, iter:  61,500, lr:(5.000e-06,)] [eta: 4 days, 11:44:23, time (data): 1.400 (0.000)] l_pix: 5.9107e-02 
+2025-10-14 11:20:29,564 INFO: Validation RGBNIR_val
+	 # psnr: 24.9319	Best: 24.9319 @ 61500 iter
+	 # ssim: 0.6692	Best: 0.6692 @ 61500 iter
+
+2025-10-14 11:22:49,421 INFO: [PFT_R..][epoch: 49, iter:  61,600, lr:(5.000e-06,)] [eta: 4 days, 11:43:19, time (data): 1.398 (0.000)] l_pix: 4.6002e-02 
+2025-10-14 11:25:09,379 INFO: [PFT_R..][epoch: 49, iter:  61,700, lr:(5.000e-06,)] [eta: 4 days, 11:40:35, time (data): 1.399 (0.000)] l_pix: 5.3301e-02 
+2025-10-14 11:27:29,246 INFO: [PFT_R..][epoch: 49, iter:  61,800, lr:(5.000e-06,)] [eta: 4 days, 11:37:50, time (data): 1.398 (0.000)] l_pix: 5.8770e-02 
+2025-10-14 11:29:49,131 INFO: [PFT_R..][epoch: 49, iter:  61,900, lr:(5.000e-06,)] [eta: 4 days, 11:35:06, time (data): 1.399 (0.000)] l_pix: 7.6407e-02 
+2025-10-14 11:32:08,906 INFO: [PFT_R..][epoch: 49, iter:  62,000, lr:(5.000e-06,)] [eta: 4 days, 11:32:21, time (data): 1.398 (0.000)] l_pix: 6.6108e-02 
+2025-10-14 11:32:31,985 INFO: Validation RGBNIR_val
+	 # psnr: 24.9319	Best: 24.9319 @ 62000 iter
+	 # ssim: 0.6692	Best: 0.6692 @ 61500 iter
+
+2025-10-14 11:34:51,654 INFO: [PFT_R..][epoch: 49, iter:  62,100, lr:(5.000e-06,)] [eta: 4 days, 11:31:16, time (data): 1.397 (0.000)] l_pix: 7.1684e-02 
+2025-10-14 11:37:11,696 INFO: [PFT_R..][epoch: 49, iter:  62,200, lr:(5.000e-06,)] [eta: 4 days, 11:28:32, time (data): 1.401 (0.000)] l_pix: 7.1352e-02 
+2025-10-14 11:39:31,643 INFO: [PFT_R..][epoch: 49, iter:  62,300, lr:(5.000e-06,)] [eta: 4 days, 11:25:48, time (data): 1.400 (0.000)] l_pix: 7.3098e-02 
+2025-10-14 11:41:51,465 INFO: [PFT_R..][epoch: 49, iter:  62,400, lr:(5.000e-06,)] [eta: 4 days, 11:23:04, time (data): 1.398 (0.000)] l_pix: 6.6489e-02 
+2025-10-14 11:44:11,272 INFO: [PFT_R..][epoch: 49, iter:  62,500, lr:(5.000e-06,)] [eta: 4 days, 11:20:19, time (data): 1.398 (0.000)] l_pix: 4.9647e-02 
+2025-10-14 11:44:34,508 INFO: Validation RGBNIR_val
+	 # psnr: 24.9318	Best: 24.9319 @ 62000 iter
+	 # ssim: 0.6692	Best: 0.6692 @ 61500 iter
+
+2025-10-14 11:46:54,331 INFO: [PFT_R..][epoch: 50, iter:  62,600, lr:(5.000e-06,)] [eta: 4 days, 11:19:14, time (data): 1.398 (0.000)] l_pix: 5.5801e-02 
+2025-10-14 11:49:14,161 INFO: [PFT_R..][epoch: 50, iter:  62,700, lr:(5.000e-06,)] [eta: 4 days, 11:16:30, time (data): 1.398 (0.000)] l_pix: 5.2965e-02 
+2025-10-14 11:51:34,086 INFO: [PFT_R..][epoch: 50, iter:  62,800, lr:(5.000e-06,)] [eta: 4 days, 11:13:46, time (data): 1.400 (0.000)] l_pix: 6.2876e-02 
+2025-10-14 11:53:53,840 INFO: [PFT_R..][epoch: 50, iter:  62,900, lr:(5.000e-06,)] [eta: 4 days, 11:11:02, time (data): 1.399 (0.000)] l_pix: 6.8419e-02 
+2025-10-14 11:56:13,747 INFO: [PFT_R..][epoch: 50, iter:  63,000, lr:(5.000e-06,)] [eta: 4 days, 11:08:18, time (data): 1.399 (0.000)] l_pix: 7.2045e-02 
+2025-10-14 11:56:36,645 INFO: Validation RGBNIR_val
+	 # psnr: 24.9320	Best: 24.9320 @ 63000 iter
+	 # ssim: 0.6692	Best: 0.6692 @ 63000 iter
+
+2025-10-14 11:58:56,427 INFO: [PFT_R..][epoch: 50, iter:  63,100, lr:(5.000e-06,)] [eta: 4 days, 11:07:11, time (data): 1.398 (0.000)] l_pix: 5.5482e-02 
+2025-10-14 12:01:16,237 INFO: [PFT_R..][epoch: 50, iter:  63,200, lr:(5.000e-06,)] [eta: 4 days, 11:04:26, time (data): 1.398 (0.000)] l_pix: 5.5258e-02 
+2025-10-14 12:03:36,079 INFO: [PFT_R..][epoch: 50, iter:  63,300, lr:(5.000e-06,)] [eta: 4 days, 11:01:42, time (data): 1.398 (0.000)] l_pix: 5.9791e-02 
+2025-10-14 12:05:55,982 INFO: [PFT_R..][epoch: 50, iter:  63,400, lr:(5.000e-06,)] [eta: 4 days, 10:58:59, time (data): 1.399 (0.000)] l_pix: 7.5598e-02 
+2025-10-14 12:08:15,895 INFO: [PFT_R..][epoch: 50, iter:  63,500, lr:(5.000e-06,)] [eta: 4 days, 10:56:15, time (data): 1.399 (0.000)] l_pix: 4.9383e-02 
+2025-10-14 12:08:39,064 INFO: Validation RGBNIR_val
+	 # psnr: 24.9319	Best: 24.9320 @ 63000 iter
+	 # ssim: 0.6692	Best: 0.6692 @ 63000 iter
+
+2025-10-14 12:10:58,836 INFO: [PFT_R..][epoch: 50, iter:  63,600, lr:(5.000e-06,)] [eta: 4 days, 10:55:08, time (data): 1.399 (0.000)] l_pix: 5.8002e-02 
+2025-10-14 12:13:18,628 INFO: [PFT_R..][epoch: 50, iter:  63,700, lr:(5.000e-06,)] [eta: 4 days, 10:52:24, time (data): 1.398 (0.000)] l_pix: 5.8514e-02 
+2025-10-14 12:15:38,527 INFO: [PFT_R..][epoch: 51, iter:  63,800, lr:(5.000e-06,)] [eta: 4 days, 10:49:40, time (data): 1.399 (0.001)] l_pix: 7.7133e-02 
+2025-10-14 12:17:58,324 INFO: [PFT_R..][epoch: 51, iter:  63,900, lr:(5.000e-06,)] [eta: 4 days, 10:46:56, time (data): 1.398 (0.001)] l_pix: 8.2931e-02 
+2025-10-14 12:20:18,141 INFO: [PFT_R..][epoch: 51, iter:  64,000, lr:(5.000e-06,)] [eta: 4 days, 10:44:13, time (data): 1.398 (0.000)] l_pix: 7.5171e-02 
+2025-10-14 12:20:41,099 INFO: Validation RGBNIR_val
+	 # psnr: 24.9322	Best: 24.9322 @ 64000 iter
+	 # ssim: 0.6692	Best: 0.6692 @ 63000 iter
+
+2025-10-14 12:23:01,014 INFO: [PFT_R..][epoch: 51, iter:  64,100, lr:(5.000e-06,)] [eta: 4 days, 10:43:05, time (data): 1.399 (0.000)] l_pix: 5.4242e-02 
+2025-10-14 12:25:20,914 INFO: [PFT_R..][epoch: 51, iter:  64,200, lr:(5.000e-06,)] [eta: 4 days, 10:40:21, time (data): 1.400 (0.000)] l_pix: 6.8847e-02 
+2025-10-14 12:27:40,862 INFO: [PFT_R..][epoch: 51, iter:  64,300, lr:(5.000e-06,)] [eta: 4 days, 10:37:38, time (data): 1.400 (0.000)] l_pix: 6.3360e-02 
+2025-10-14 12:30:00,764 INFO: [PFT_R..][epoch: 51, iter:  64,400, lr:(5.000e-06,)] [eta: 4 days, 10:34:55, time (data): 1.399 (0.000)] l_pix: 7.3645e-02 
+2025-10-14 12:32:20,770 INFO: [PFT_R..][epoch: 51, iter:  64,500, lr:(5.000e-06,)] [eta: 4 days, 10:32:12, time (data): 1.400 (0.000)] l_pix: 5.6669e-02 
+2025-10-14 12:32:43,891 INFO: Validation RGBNIR_val
+	 # psnr: 24.9322	Best: 24.9322 @ 64500 iter
+	 # ssim: 0.6692	Best: 0.6692 @ 63000 iter
+
+2025-10-14 12:35:03,759 INFO: [PFT_R..][epoch: 51, iter:  64,600, lr:(5.000e-06,)] [eta: 4 days, 10:31:03, time (data): 1.399 (0.000)] l_pix: 6.1349e-02 
+2025-10-14 12:37:23,613 INFO: [PFT_R..][epoch: 51, iter:  64,700, lr:(5.000e-06,)] [eta: 4 days, 10:28:20, time (data): 1.399 (0.000)] l_pix: 5.1163e-02 
+2025-10-14 12:39:43,589 INFO: [PFT_R..][epoch: 51, iter:  64,800, lr:(5.000e-06,)] [eta: 4 days, 10:25:37, time (data): 1.400 (0.000)] l_pix: 6.5326e-02 
+2025-10-14 12:42:03,570 INFO: [PFT_R..][epoch: 51, iter:  64,900, lr:(5.000e-06,)] [eta: 4 days, 10:22:54, time (data): 1.400 (0.000)] l_pix: 5.2124e-02 
+2025-10-14 12:44:23,656 INFO: [PFT_R..][epoch: 51, iter:  65,000, lr:(5.000e-06,)] [eta: 4 days, 10:20:12, time (data): 1.401 (0.000)] l_pix: 5.5354e-02 
+2025-10-14 12:44:23,656 INFO: Saving models and training states.
+2025-10-14 12:44:47,966 INFO: Validation RGBNIR_val
+	 # psnr: 24.9321	Best: 24.9322 @ 64500 iter
+	 # ssim: 0.6692	Best: 0.6692 @ 63000 iter
+
+2025-10-14 12:47:07,862 INFO: [PFT_R..][epoch: 52, iter:  65,100, lr:(5.000e-06,)] [eta: 4 days, 10:19:08, time (data): 1.400 (0.001)] l_pix: 5.4981e-02 
+2025-10-14 12:49:27,967 INFO: [PFT_R..][epoch: 52, iter:  65,200, lr:(5.000e-06,)] [eta: 4 days, 10:16:26, time (data): 1.401 (0.000)] l_pix: 6.2922e-02 
+2025-10-14 12:51:47,941 INFO: [PFT_R..][epoch: 52, iter:  65,300, lr:(5.000e-06,)] [eta: 4 days, 10:13:43, time (data): 1.400 (0.000)] l_pix: 6.0543e-02 
+2025-10-14 12:54:07,967 INFO: [PFT_R..][epoch: 52, iter:  65,400, lr:(5.000e-06,)] [eta: 4 days, 10:11:00, time (data): 1.400 (0.000)] l_pix: 4.2059e-02 
+2025-10-14 12:56:28,106 INFO: [PFT_R..][epoch: 52, iter:  65,500, lr:(5.000e-06,)] [eta: 4 days, 10:08:18, time (data): 1.401 (0.000)] l_pix: 6.7394e-02 
+2025-10-14 12:56:51,083 INFO: Validation RGBNIR_val
+	 # psnr: 24.9317	Best: 24.9322 @ 64500 iter
+	 # ssim: 0.6692	Best: 0.6692 @ 63000 iter
+
+2025-10-14 12:59:10,959 INFO: [PFT_R..][epoch: 52, iter:  65,600, lr:(5.000e-06,)] [eta: 4 days, 10:07:08, time (data): 1.399 (0.000)] l_pix: 6.2500e-02 
+2025-10-14 13:01:30,799 INFO: [PFT_R..][epoch: 52, iter:  65,700, lr:(5.000e-06,)] [eta: 4 days, 10:04:25, time (data): 1.399 (0.000)] l_pix: 6.4664e-02 
+2025-10-14 13:03:50,885 INFO: [PFT_R..][epoch: 52, iter:  65,800, lr:(5.000e-06,)] [eta: 4 days, 10:01:43, time (data): 1.400 (0.000)] l_pix: 5.4460e-02 
+2025-10-14 13:06:10,539 INFO: [PFT_R..][epoch: 52, iter:  65,900, lr:(5.000e-06,)] [eta: 4 days, 9:58:59, time (data): 1.398 (0.000)] l_pix: 6.8097e-02 
+2025-10-14 13:08:30,569 INFO: [PFT_R..][epoch: 52, iter:  66,000, lr:(5.000e-06,)] [eta: 4 days, 9:56:17, time (data): 1.400 (0.000)] l_pix: 7.0423e-02 
+2025-10-14 13:08:53,728 INFO: Validation RGBNIR_val
+	 # psnr: 24.9318	Best: 24.9322 @ 64500 iter
+	 # ssim: 0.6692	Best: 0.6692 @ 63000 iter
+
+2025-10-14 13:11:13,574 INFO: [PFT_R..][epoch: 52, iter:  66,100, lr:(5.000e-06,)] [eta: 4 days, 9:55:06, time (data): 1.399 (0.000)] l_pix: 7.8374e-02 
+2025-10-14 13:13:33,281 INFO: [PFT_R..][epoch: 52, iter:  66,200, lr:(5.000e-06,)] [eta: 4 days, 9:52:23, time (data): 1.397 (0.000)] l_pix: 5.9501e-02 
+2025-10-14 13:15:53,259 INFO: [PFT_R..][epoch: 53, iter:  66,300, lr:(5.000e-06,)] [eta: 4 days, 9:49:40, time (data): 1.399 (0.001)] l_pix: 5.9624e-02 
+2025-10-14 13:18:13,333 INFO: [PFT_R..][epoch: 53, iter:  66,400, lr:(5.000e-06,)] [eta: 4 days, 9:46:58, time (data): 1.401 (0.000)] l_pix: 5.1121e-02 
+2025-10-14 13:20:33,362 INFO: [PFT_R..][epoch: 53, iter:  66,500, lr:(5.000e-06,)] [eta: 4 days, 9:44:16, time (data): 1.401 (0.000)] l_pix: 7.8912e-02 
+2025-10-14 13:20:56,383 INFO: Validation RGBNIR_val
+	 # psnr: 24.9321	Best: 24.9322 @ 64500 iter
+	 # ssim: 0.6692	Best: 0.6692 @ 63000 iter
+
+2025-10-14 13:23:16,220 INFO: [PFT_R..][epoch: 53, iter:  66,600, lr:(5.000e-06,)] [eta: 4 days, 9:43:05, time (data): 1.399 (0.000)] l_pix: 6.2640e-02 
+2025-10-14 13:25:35,966 INFO: [PFT_R..][epoch: 53, iter:  66,700, lr:(5.000e-06,)] [eta: 4 days, 9:40:21, time (data): 1.398 (0.000)] l_pix: 3.8616e-02 
+2025-10-14 13:27:55,897 INFO: [PFT_R..][epoch: 53, iter:  66,800, lr:(5.000e-06,)] [eta: 4 days, 9:37:39, time (data): 1.399 (0.000)] l_pix: 5.3075e-02 
+2025-10-14 13:30:16,010 INFO: [PFT_R..][epoch: 53, iter:  66,900, lr:(5.000e-06,)] [eta: 4 days, 9:34:57, time (data): 1.400 (0.000)] l_pix: 5.8338e-02 
+2025-10-14 13:32:36,077 INFO: [PFT_R..][epoch: 53, iter:  67,000, lr:(5.000e-06,)] [eta: 4 days, 9:32:16, time (data): 1.401 (0.000)] l_pix: 5.3177e-02 
+2025-10-14 13:32:59,198 INFO: Validation RGBNIR_val
+	 # psnr: 24.9321	Best: 24.9322 @ 64500 iter
+	 # ssim: 0.6692	Best: 0.6692 @ 63000 iter
+
+2025-10-14 13:35:18,909 INFO: [PFT_R..][epoch: 53, iter:  67,100, lr:(5.000e-06,)] [eta: 4 days, 9:31:03, time (data): 1.399 (0.000)] l_pix: 6.5995e-02 
+2025-10-14 13:37:38,832 INFO: [PFT_R..][epoch: 53, iter:  67,200, lr:(5.000e-06,)] [eta: 4 days, 9:28:21, time (data): 1.400 (0.000)] l_pix: 5.9924e-02 
+2025-10-14 13:39:58,765 INFO: [PFT_R..][epoch: 53, iter:  67,300, lr:(5.000e-06,)] [eta: 4 days, 9:25:39, time (data): 1.399 (0.000)] l_pix: 6.0557e-02 
+2025-10-14 13:42:18,634 INFO: [PFT_R..][epoch: 53, iter:  67,400, lr:(5.000e-06,)] [eta: 4 days, 9:22:56, time (data): 1.399 (0.000)] l_pix: 5.6360e-02 
+2025-10-14 13:44:38,625 INFO: [PFT_R..][epoch: 53, iter:  67,500, lr:(5.000e-06,)] [eta: 4 days, 9:20:14, time (data): 1.399 (0.000)] l_pix: 8.1048e-02 
+2025-10-14 13:45:01,888 INFO: Validation RGBNIR_val
+	 # psnr: 24.9321	Best: 24.9322 @ 64500 iter
+	 # ssim: 0.6692	Best: 0.6692 @ 63000 iter
+
+2025-10-14 13:47:21,663 INFO: [PFT_R..][epoch: 54, iter:  67,600, lr:(5.000e-06,)] [eta: 4 days, 9:19:02, time (data): 1.399 (0.000)] l_pix: 6.8026e-02 
+2025-10-14 13:49:41,549 INFO: [PFT_R..][epoch: 54, iter:  67,700, lr:(5.000e-06,)] [eta: 4 days, 9:16:19, time (data): 1.399 (0.000)] l_pix: 6.0385e-02 
+2025-10-14 13:52:01,516 INFO: [PFT_R..][epoch: 54, iter:  67,800, lr:(5.000e-06,)] [eta: 4 days, 9:13:38, time (data): 1.400 (0.000)] l_pix: 7.3365e-02 
+2025-10-14 13:54:21,525 INFO: [PFT_R..][epoch: 54, iter:  67,900, lr:(5.000e-06,)] [eta: 4 days, 9:10:56, time (data): 1.400 (0.000)] l_pix: 6.6380e-02 
+2025-10-14 13:56:41,407 INFO: [PFT_R..][epoch: 54, iter:  68,000, lr:(5.000e-06,)] [eta: 4 days, 9:08:14, time (data): 1.400 (0.000)] l_pix: 5.9502e-02 
+2025-10-14 13:57:04,337 INFO: Validation RGBNIR_val
+	 # psnr: 24.9323	Best: 24.9323 @ 68000 iter
+	 # ssim: 0.6692	Best: 0.6692 @ 63000 iter
+
+2025-10-14 13:59:24,204 INFO: [PFT_R..][epoch: 54, iter:  68,100, lr:(5.000e-06,)] [eta: 4 days, 9:07:00, time (data): 1.399 (0.000)] l_pix: 5.5921e-02 
+2025-10-14 14:01:44,118 INFO: [PFT_R..][epoch: 54, iter:  68,200, lr:(5.000e-06,)] [eta: 4 days, 9:04:18, time (data): 1.399 (0.000)] l_pix: 6.4103e-02 
+2025-10-14 14:04:04,088 INFO: [PFT_R..][epoch: 54, iter:  68,300, lr:(5.000e-06,)] [eta: 4 days, 9:01:36, time (data): 1.400 (0.000)] l_pix: 4.7429e-02 
+2025-10-14 14:06:23,899 INFO: [PFT_R..][epoch: 54, iter:  68,400, lr:(5.000e-06,)] [eta: 4 days, 8:58:54, time (data): 1.399 (0.000)] l_pix: 6.0373e-02 
+2025-10-14 14:08:43,895 INFO: [PFT_R..][epoch: 54, iter:  68,500, lr:(5.000e-06,)] [eta: 4 days, 8:56:12, time (data): 1.400 (0.000)] l_pix: 4.8693e-02 
+2025-10-14 14:09:06,965 INFO: Validation RGBNIR_val
+	 # psnr: 24.9326	Best: 24.9326 @ 68500 iter
+	 # ssim: 0.6692	Best: 0.6692 @ 63000 iter
+
+2025-10-14 14:11:26,733 INFO: [PFT_R..][epoch: 54, iter:  68,600, lr:(5.000e-06,)] [eta: 4 days, 8:54:58, time (data): 1.399 (0.000)] l_pix: 5.7327e-02 
+2025-10-14 14:13:46,707 INFO: [PFT_R..][epoch: 54, iter:  68,700, lr:(5.000e-06,)] [eta: 4 days, 8:52:16, time (data): 1.399 (0.000)] l_pix: 5.5439e-02 
+2025-10-14 14:16:06,683 INFO: [PFT_R..][epoch: 55, iter:  68,800, lr:(5.000e-06,)] [eta: 4 days, 8:49:34, time (data): 1.401 (0.001)] l_pix: 3.8243e-02 
+2025-10-14 14:18:26,759 INFO: [PFT_R..][epoch: 55, iter:  68,900, lr:(5.000e-06,)] [eta: 4 days, 8:46:53, time (data): 1.401 (0.001)] l_pix: 7.9143e-02 
+2025-10-14 14:20:46,740 INFO: [PFT_R..][epoch: 55, iter:  69,000, lr:(5.000e-06,)] [eta: 4 days, 8:44:12, time (data): 1.400 (0.000)] l_pix: 6.1078e-02 
+2025-10-14 14:21:09,763 INFO: Validation RGBNIR_val
+	 # psnr: 24.9328	Best: 24.9328 @ 69000 iter
+	 # ssim: 0.6692	Best: 0.6692 @ 69000 iter
+
+2025-10-14 14:23:29,524 INFO: [PFT_R..][epoch: 55, iter:  69,100, lr:(5.000e-06,)] [eta: 4 days, 8:42:56, time (data): 1.398 (0.000)] l_pix: 6.7705e-02 
+2025-10-14 14:25:49,424 INFO: [PFT_R..][epoch: 55, iter:  69,200, lr:(5.000e-06,)] [eta: 4 days, 8:40:15, time (data): 1.399 (0.000)] l_pix: 6.5742e-02 
+2025-10-14 14:28:09,270 INFO: [PFT_R..][epoch: 55, iter:  69,300, lr:(5.000e-06,)] [eta: 4 days, 8:37:33, time (data): 1.399 (0.000)] l_pix: 7.9903e-02 
+2025-10-14 14:30:29,156 INFO: [PFT_R..][epoch: 55, iter:  69,400, lr:(5.000e-06,)] [eta: 4 days, 8:34:51, time (data): 1.399 (0.000)] l_pix: 6.4010e-02 
+2025-10-14 14:32:49,199 INFO: [PFT_R..][epoch: 55, iter:  69,500, lr:(5.000e-06,)] [eta: 4 days, 8:32:10, time (data): 1.400 (0.000)] l_pix: 8.1610e-02 
+2025-10-14 14:33:12,281 INFO: Validation RGBNIR_val
+	 # psnr: 24.9328	Best: 24.9328 @ 69000 iter
+	 # ssim: 0.6693	Best: 0.6693 @ 69500 iter
+
+2025-10-14 14:35:32,163 INFO: [PFT_R..][epoch: 55, iter:  69,600, lr:(5.000e-06,)] [eta: 4 days, 8:30:55, time (data): 1.399 (0.000)] l_pix: 6.4827e-02 
+2025-10-14 14:37:52,065 INFO: [PFT_R..][epoch: 55, iter:  69,700, lr:(5.000e-06,)] [eta: 4 days, 8:28:13, time (data): 1.399 (0.000)] l_pix: 5.7044e-02 
+2025-10-14 14:40:12,062 INFO: [PFT_R..][epoch: 55, iter:  69,800, lr:(5.000e-06,)] [eta: 4 days, 8:25:32, time (data): 1.399 (0.000)] l_pix: 6.6435e-02 
+2025-10-14 14:42:31,925 INFO: [PFT_R..][epoch: 55, iter:  69,900, lr:(5.000e-06,)] [eta: 4 days, 8:22:50, time (data): 1.399 (0.000)] l_pix: 4.3268e-02 
+2025-10-14 14:44:51,851 INFO: [PFT_R..][epoch: 55, iter:  70,000, lr:(5.000e-06,)] [eta: 4 days, 8:20:09, time (data): 1.400 (0.000)] l_pix: 6.4823e-02 
+2025-10-14 14:44:51,851 INFO: Saving models and training states.
+2025-10-14 14:45:16,197 INFO: Validation RGBNIR_val
+	 # psnr: 24.9329	Best: 24.9329 @ 70000 iter
+	 # ssim: 0.6693	Best: 0.6693 @ 70000 iter
+
+2025-10-14 14:47:36,030 INFO: [PFT_R..][epoch: 56, iter:  70,100, lr:(5.000e-06,)] [eta: 4 days, 8:18:57, time (data): 1.399 (0.001)] l_pix: 6.5617e-02 
+2025-10-14 14:49:55,996 INFO: [PFT_R..][epoch: 56, iter:  70,200, lr:(5.000e-06,)] [eta: 4 days, 8:16:16, time (data): 1.399 (0.000)] l_pix: 8.9361e-02 
+2025-10-14 14:52:15,887 INFO: [PFT_R..][epoch: 56, iter:  70,300, lr:(5.000e-06,)] [eta: 4 days, 8:13:35, time (data): 1.399 (0.000)] l_pix: 5.8723e-02 
+2025-10-14 14:54:35,913 INFO: [PFT_R..][epoch: 56, iter:  70,400, lr:(5.000e-06,)] [eta: 4 days, 8:10:54, time (data): 1.399 (0.000)] l_pix: 6.6501e-02 
+2025-10-14 14:56:55,794 INFO: [PFT_R..][epoch: 56, iter:  70,500, lr:(5.000e-06,)] [eta: 4 days, 8:08:12, time (data): 1.399 (0.000)] l_pix: 8.2072e-02 
+2025-10-14 14:57:18,750 INFO: Validation RGBNIR_val
+	 # psnr: 24.9329	Best: 24.9329 @ 70500 iter
+	 # ssim: 0.6693	Best: 0.6693 @ 70500 iter
+
+2025-10-14 14:59:38,389 INFO: [PFT_R..][epoch: 56, iter:  70,600, lr:(5.000e-06,)] [eta: 4 days, 8:06:54, time (data): 1.397 (0.000)] l_pix: 6.6195e-02 
+2025-10-14 15:01:58,225 INFO: [PFT_R..][epoch: 56, iter:  70,700, lr:(5.000e-06,)] [eta: 4 days, 8:04:13, time (data): 1.398 (0.000)] l_pix: 5.6583e-02 
+2025-10-14 15:04:18,079 INFO: [PFT_R..][epoch: 56, iter:  70,800, lr:(5.000e-06,)] [eta: 4 days, 8:01:31, time (data): 1.400 (0.000)] l_pix: 5.3518e-02 
+2025-10-14 15:06:38,141 INFO: [PFT_R..][epoch: 56, iter:  70,900, lr:(5.000e-06,)] [eta: 4 days, 7:58:51, time (data): 1.400 (0.000)] l_pix: 5.7754e-02 
+2025-10-14 15:08:58,255 INFO: [PFT_R..][epoch: 56, iter:  71,000, lr:(5.000e-06,)] [eta: 4 days, 7:56:10, time (data): 1.402 (0.000)] l_pix: 5.4041e-02 
+2025-10-14 15:09:21,408 INFO: Validation RGBNIR_val
+	 # psnr: 24.9326	Best: 24.9329 @ 70500 iter
+	 # ssim: 0.6693	Best: 0.6693 @ 70500 iter
+
+2025-10-14 15:11:41,250 INFO: [PFT_R..][epoch: 56, iter:  71,100, lr:(5.000e-06,)] [eta: 4 days, 7:54:53, time (data): 1.399 (0.000)] l_pix: 6.5514e-02 
+2025-10-14 15:14:01,212 INFO: [PFT_R..][epoch: 56, iter:  71,200, lr:(5.000e-06,)] [eta: 4 days, 7:52:12, time (data): 1.400 (0.000)] l_pix: 4.9301e-02 
+2025-10-14 15:16:21,175 INFO: [PFT_R..][epoch: 57, iter:  71,300, lr:(5.000e-06,)] [eta: 4 days, 7:49:32, time (data): 1.400 (0.001)] l_pix: 7.9017e-02 
+2025-10-14 15:18:41,081 INFO: [PFT_R..][epoch: 57, iter:  71,400, lr:(5.000e-06,)] [eta: 4 days, 7:46:50, time (data): 1.400 (0.000)] l_pix: 5.8317e-02 
+2025-10-14 15:21:00,925 INFO: [PFT_R..][epoch: 57, iter:  71,500, lr:(5.000e-06,)] [eta: 4 days, 7:44:09, time (data): 1.399 (0.000)] l_pix: 6.0852e-02 
+2025-10-14 15:21:23,903 INFO: Validation RGBNIR_val
+	 # psnr: 24.9328	Best: 24.9329 @ 70500 iter
+	 # ssim: 0.6693	Best: 0.6693 @ 70500 iter
+
+2025-10-14 15:23:43,913 INFO: [PFT_R..][epoch: 57, iter:  71,600, lr:(5.000e-06,)] [eta: 4 days, 7:42:52, time (data): 1.400 (0.000)] l_pix: 6.7903e-02 
+2025-10-14 15:26:03,919 INFO: [PFT_R..][epoch: 57, iter:  71,700, lr:(5.000e-06,)] [eta: 4 days, 7:40:11, time (data): 1.400 (0.000)] l_pix: 7.2686e-02 
+2025-10-14 15:28:23,896 INFO: [PFT_R..][epoch: 57, iter:  71,800, lr:(5.000e-06,)] [eta: 4 days, 7:37:30, time (data): 1.402 (0.000)] l_pix: 6.3637e-02 
+2025-10-14 15:30:43,779 INFO: [PFT_R..][epoch: 57, iter:  71,900, lr:(5.000e-06,)] [eta: 4 days, 7:34:49, time (data): 1.400 (0.000)] l_pix: 5.2705e-02 
+2025-10-14 15:33:03,982 INFO: [PFT_R..][epoch: 57, iter:  72,000, lr:(5.000e-06,)] [eta: 4 days, 7:32:09, time (data): 1.401 (0.000)] l_pix: 5.5306e-02 
+2025-10-14 15:33:27,118 INFO: Validation RGBNIR_val
+	 # psnr: 24.9329	Best: 24.9329 @ 70500 iter
+	 # ssim: 0.6693	Best: 0.6693 @ 70500 iter
+
+2025-10-14 15:35:46,996 INFO: [PFT_R..][epoch: 57, iter:  72,100, lr:(5.000e-06,)] [eta: 4 days, 7:30:51, time (data): 1.400 (0.000)] l_pix: 5.9596e-02 
+2025-10-14 15:38:06,933 INFO: [PFT_R..][epoch: 57, iter:  72,200, lr:(5.000e-06,)] [eta: 4 days, 7:28:11, time (data): 1.399 (0.000)] l_pix: 5.8426e-02 
+2025-10-14 15:40:27,054 INFO: [PFT_R..][epoch: 57, iter:  72,300, lr:(5.000e-06,)] [eta: 4 days, 7:25:31, time (data): 1.400 (0.000)] l_pix: 5.3645e-02 
+2025-10-14 15:42:47,013 INFO: [PFT_R..][epoch: 57, iter:  72,400, lr:(5.000e-06,)] [eta: 4 days, 7:22:50, time (data): 1.398 (0.000)] l_pix: 6.4070e-02 
+2025-10-14 15:45:06,991 INFO: [PFT_R..][epoch: 57, iter:  72,500, lr:(5.000e-06,)] [eta: 4 days, 7:20:09, time (data): 1.399 (0.000)] l_pix: 6.5246e-02 
+2025-10-14 15:45:30,250 INFO: Validation RGBNIR_val
+	 # psnr: 24.9329	Best: 24.9329 @ 70500 iter
+	 # ssim: 0.6693	Best: 0.6693 @ 70500 iter
+
+2025-10-14 15:47:50,146 INFO: [PFT_R..][epoch: 58, iter:  72,600, lr:(5.000e-06,)] [eta: 4 days, 7:18:51, time (data): 1.400 (0.000)] l_pix: 5.4655e-02 
+2025-10-14 15:50:09,965 INFO: [PFT_R..][epoch: 58, iter:  72,700, lr:(5.000e-06,)] [eta: 4 days, 7:16:10, time (data): 1.399 (0.000)] l_pix: 7.2847e-02 
+2025-10-14 15:52:29,983 INFO: [PFT_R..][epoch: 58, iter:  72,800, lr:(5.000e-06,)] [eta: 4 days, 7:13:30, time (data): 1.400 (0.000)] l_pix: 6.4777e-02 
+2025-10-14 15:54:49,883 INFO: [PFT_R..][epoch: 58, iter:  72,900, lr:(5.000e-06,)] [eta: 4 days, 7:10:49, time (data): 1.399 (0.000)] l_pix: 4.4194e-02 
+2025-10-14 15:57:09,928 INFO: [PFT_R..][epoch: 58, iter:  73,000, lr:(5.000e-06,)] [eta: 4 days, 7:08:09, time (data): 1.399 (0.000)] l_pix: 5.3461e-02 
+2025-10-14 15:57:32,696 INFO: Validation RGBNIR_val
+	 # psnr: 24.9330	Best: 24.9330 @ 73000 iter
+	 # ssim: 0.6693	Best: 0.6693 @ 70500 iter
+
+2025-10-14 15:59:52,363 INFO: [PFT_R..][epoch: 58, iter:  73,100, lr:(5.000e-06,)] [eta: 4 days, 7:06:48, time (data): 1.397 (0.000)] l_pix: 6.5011e-02 
+2025-10-14 16:02:12,246 INFO: [PFT_R..][epoch: 58, iter:  73,200, lr:(5.000e-06,)] [eta: 4 days, 7:04:07, time (data): 1.400 (0.000)] l_pix: 7.1248e-02 
+2025-10-14 16:04:32,155 INFO: [PFT_R..][epoch: 58, iter:  73,300, lr:(5.000e-06,)] [eta: 4 days, 7:01:27, time (data): 1.399 (0.000)] l_pix: 5.2047e-02 
+2025-10-14 16:06:51,765 INFO: [PFT_R..][epoch: 58, iter:  73,400, lr:(5.000e-06,)] [eta: 4 days, 6:58:45, time (data): 1.396 (0.000)] l_pix: 7.0395e-02 
+2025-10-14 16:09:11,757 INFO: [PFT_R..][epoch: 58, iter:  73,500, lr:(5.000e-06,)] [eta: 4 days, 6:56:05, time (data): 1.399 (0.000)] l_pix: 6.0870e-02 
+2025-10-14 16:09:34,811 INFO: Validation RGBNIR_val
+	 # psnr: 24.9331	Best: 24.9331 @ 73500 iter
+	 # ssim: 0.6693	Best: 0.6693 @ 70500 iter
+
+2025-10-14 16:11:54,568 INFO: [PFT_R..][epoch: 58, iter:  73,600, lr:(5.000e-06,)] [eta: 4 days, 6:54:44, time (data): 1.397 (0.000)] l_pix: 7.3720e-02 
+2025-10-14 16:14:14,266 INFO: [PFT_R..][epoch: 58, iter:  73,700, lr:(5.000e-06,)] [eta: 4 days, 6:52:03, time (data): 1.397 (0.000)] l_pix: 6.6469e-02 
+2025-10-14 16:16:34,128 INFO: [PFT_R..][epoch: 59, iter:  73,800, lr:(5.000e-06,)] [eta: 4 days, 6:49:23, time (data): 1.397 (0.000)] l_pix: 7.1854e-02 
+2025-10-14 16:18:54,018 INFO: [PFT_R..][epoch: 59, iter:  73,900, lr:(5.000e-06,)] [eta: 4 days, 6:46:42, time (data): 1.398 (0.000)] l_pix: 5.4564e-02 
+2025-10-14 16:21:13,729 INFO: [PFT_R..][epoch: 59, iter:  74,000, lr:(5.000e-06,)] [eta: 4 days, 6:44:01, time (data): 1.399 (0.000)] l_pix: 7.4210e-02 
+2025-10-14 16:21:36,484 INFO: Validation RGBNIR_val
+	 # psnr: 24.9335	Best: 24.9335 @ 74000 iter
+	 # ssim: 0.6692	Best: 0.6693 @ 70500 iter
+
+2025-10-14 16:23:56,165 INFO: [PFT_R..][epoch: 59, iter:  74,100, lr:(5.000e-06,)] [eta: 4 days, 6:42:39, time (data): 1.397 (0.000)] l_pix: 4.4060e-02 
+2025-10-14 16:26:15,916 INFO: [PFT_R..][epoch: 59, iter:  74,200, lr:(5.000e-06,)] [eta: 4 days, 6:39:58, time (data): 1.399 (0.000)] l_pix: 4.0747e-02 
+2025-10-14 16:28:35,808 INFO: [PFT_R..][epoch: 59, iter:  74,300, lr:(5.000e-06,)] [eta: 4 days, 6:37:18, time (data): 1.399 (0.000)] l_pix: 7.6940e-02 
+2025-10-14 16:30:55,460 INFO: [PFT_R..][epoch: 59, iter:  74,400, lr:(5.000e-06,)] [eta: 4 days, 6:34:37, time (data): 1.399 (0.001)] l_pix: 6.4527e-02 
+2025-10-14 16:33:15,126 INFO: [PFT_R..][epoch: 59, iter:  74,500, lr:(5.000e-06,)] [eta: 4 days, 6:31:56, time (data): 1.397 (0.000)] l_pix: 6.4452e-02 
+2025-10-14 16:33:38,340 INFO: Validation RGBNIR_val
+	 # psnr: 24.9338	Best: 24.9338 @ 74500 iter
+	 # ssim: 0.6693	Best: 0.6693 @ 70500 iter
+
+2025-10-14 16:35:57,788 INFO: [PFT_R..][epoch: 59, iter:  74,600, lr:(5.000e-06,)] [eta: 4 days, 6:30:34, time (data): 1.395 (0.000)] l_pix: 5.6952e-02 
+2025-10-14 16:38:17,424 INFO: [PFT_R..][epoch: 59, iter:  74,700, lr:(5.000e-06,)] [eta: 4 days, 6:27:52, time (data): 1.396 (0.000)] l_pix: 5.9266e-02 
+2025-10-14 16:40:37,152 INFO: [PFT_R..][epoch: 59, iter:  74,800, lr:(5.000e-06,)] [eta: 4 days, 6:25:12, time (data): 1.399 (0.000)] l_pix: 5.8107e-02 
+2025-10-14 16:42:56,885 INFO: [PFT_R..][epoch: 59, iter:  74,900, lr:(5.000e-06,)] [eta: 4 days, 6:22:31, time (data): 1.398 (0.000)] l_pix: 6.0170e-02 
+2025-10-14 16:45:16,671 INFO: [PFT_R..][epoch: 59, iter:  75,000, lr:(5.000e-06,)] [eta: 4 days, 6:19:51, time (data): 1.397 (0.000)] l_pix: 5.9344e-02 
+2025-10-14 16:45:16,671 INFO: Saving models and training states.
+2025-10-14 16:45:41,168 INFO: Validation RGBNIR_val
+	 # psnr: 24.9338	Best: 24.9338 @ 74500 iter
+	 # ssim: 0.6693	Best: 0.6693 @ 70500 iter
+
+2025-10-14 16:48:01,076 INFO: [PFT_R..][epoch: 60, iter:  75,100, lr:(5.000e-06,)] [eta: 4 days, 6:18:34, time (data): 1.399 (0.001)] l_pix: 6.2404e-02 
+2025-10-14 16:50:20,878 INFO: [PFT_R..][epoch: 60, iter:  75,200, lr:(5.000e-06,)] [eta: 4 days, 6:15:53, time (data): 1.401 (0.000)] l_pix: 8.1620e-02 
+2025-10-14 16:52:40,511 INFO: [PFT_R..][epoch: 60, iter:  75,300, lr:(5.000e-06,)] [eta: 4 days, 6:13:13, time (data): 1.397 (0.001)] l_pix: 7.2506e-02 
+2025-10-14 16:55:00,305 INFO: [PFT_R..][epoch: 60, iter:  75,400, lr:(5.000e-06,)] [eta: 4 days, 6:10:32, time (data): 1.397 (0.000)] l_pix: 5.6469e-02 
+2025-10-14 16:57:20,220 INFO: [PFT_R..][epoch: 60, iter:  75,500, lr:(5.000e-06,)] [eta: 4 days, 6:07:52, time (data): 1.399 (0.000)] l_pix: 5.9004e-02 
+2025-10-14 16:57:43,295 INFO: Validation RGBNIR_val
+	 # psnr: 24.9340	Best: 24.9340 @ 75500 iter
+	 # ssim: 0.6693	Best: 0.6693 @ 70500 iter
+
+2025-10-14 17:00:02,975 INFO: [PFT_R..][epoch: 60, iter:  75,600, lr:(5.000e-06,)] [eta: 4 days, 6:06:29, time (data): 1.397 (0.000)] l_pix: 4.4547e-02 
+2025-10-14 17:02:22,868 INFO: [PFT_R..][epoch: 60, iter:  75,700, lr:(5.000e-06,)] [eta: 4 days, 6:03:50, time (data): 1.399 (0.000)] l_pix: 6.0969e-02 
+2025-10-14 17:04:42,975 INFO: [PFT_R..][epoch: 60, iter:  75,800, lr:(5.000e-06,)] [eta: 4 days, 6:01:10, time (data): 1.402 (0.000)] l_pix: 5.1947e-02 
+2025-10-14 17:07:02,902 INFO: [PFT_R..][epoch: 60, iter:  75,900, lr:(5.000e-06,)] [eta: 4 days, 5:58:31, time (data): 1.400 (0.000)] l_pix: 5.2371e-02 
+2025-10-14 17:09:22,729 INFO: [PFT_R..][epoch: 60, iter:  76,000, lr:(5.000e-06,)] [eta: 4 days, 5:55:51, time (data): 1.398 (0.000)] l_pix: 6.1737e-02 
+2025-10-14 17:09:45,894 INFO: Validation RGBNIR_val
+	 # psnr: 24.9338	Best: 24.9340 @ 75500 iter
+	 # ssim: 0.6693	Best: 0.6693 @ 70500 iter
+
+2025-10-14 17:12:05,750 INFO: [PFT_R..][epoch: 60, iter:  76,100, lr:(5.000e-06,)] [eta: 4 days, 5:54:28, time (data): 1.398 (0.000)] l_pix: 5.8682e-02 
+2025-10-14 17:14:25,568 INFO: [PFT_R..][epoch: 60, iter:  76,200, lr:(5.000e-06,)] [eta: 4 days, 5:51:48, time (data): 1.399 (0.000)] l_pix: 6.6577e-02 
+2025-10-14 17:16:45,288 INFO: [PFT_R..][epoch: 61, iter:  76,300, lr:(5.000e-06,)] [eta: 4 days, 5:49:08, time (data): 1.398 (0.001)] l_pix: 5.9677e-02 
+2025-10-14 17:19:05,107 INFO: [PFT_R..][epoch: 61, iter:  76,400, lr:(5.000e-06,)] [eta: 4 days, 5:46:28, time (data): 1.399 (0.000)] l_pix: 6.4897e-02 
+2025-10-14 17:21:24,915 INFO: [PFT_R..][epoch: 61, iter:  76,500, lr:(5.000e-06,)] [eta: 4 days, 5:43:48, time (data): 1.398 (0.000)] l_pix: 5.8589e-02 
+2025-10-14 17:21:48,377 INFO: Validation RGBNIR_val
+	 # psnr: 24.9339	Best: 24.9340 @ 75500 iter
+	 # ssim: 0.6693	Best: 0.6693 @ 70500 iter
+
+2025-10-14 17:24:08,086 INFO: [PFT_R..][epoch: 61, iter:  76,600, lr:(5.000e-06,)] [eta: 4 days, 5:42:25, time (data): 1.395 (0.000)] l_pix: 5.0741e-02 
+2025-10-14 17:26:27,973 INFO: [PFT_R..][epoch: 61, iter:  76,700, lr:(5.000e-06,)] [eta: 4 days, 5:39:45, time (data): 1.398 (0.000)] l_pix: 5.2410e-02 
+2025-10-14 17:28:47,770 INFO: [PFT_R..][epoch: 61, iter:  76,800, lr:(5.000e-06,)] [eta: 4 days, 5:37:05, time (data): 1.397 (0.000)] l_pix: 5.9258e-02 
+2025-10-14 17:31:07,366 INFO: [PFT_R..][epoch: 61, iter:  76,900, lr:(5.000e-06,)] [eta: 4 days, 5:34:25, time (data): 1.396 (0.000)] l_pix: 6.1560e-02 
+2025-10-14 17:33:27,174 INFO: [PFT_R..][epoch: 61, iter:  77,000, lr:(5.000e-06,)] [eta: 4 days, 5:31:45, time (data): 1.395 (0.000)] l_pix: 6.7960e-02 
+2025-10-14 17:33:50,269 INFO: Validation RGBNIR_val
+	 # psnr: 24.9341	Best: 24.9341 @ 77000 iter
+	 # ssim: 0.6693	Best: 0.6693 @ 70500 iter
+
+2025-10-14 17:36:09,903 INFO: [PFT_R..][epoch: 61, iter:  77,100, lr:(5.000e-06,)] [eta: 4 days, 5:30:21, time (data): 1.396 (0.000)] l_pix: 5.9447e-02 
+2025-10-14 17:38:29,804 INFO: [PFT_R..][epoch: 61, iter:  77,200, lr:(5.000e-06,)] [eta: 4 days, 5:27:41, time (data): 1.399 (0.000)] l_pix: 8.3388e-02 
+2025-10-14 17:40:49,552 INFO: [PFT_R..][epoch: 61, iter:  77,300, lr:(5.000e-06,)] [eta: 4 days, 5:25:01, time (data): 1.398 (0.000)] l_pix: 6.0615e-02 
+2025-10-14 17:43:09,210 INFO: [PFT_R..][epoch: 61, iter:  77,400, lr:(5.000e-06,)] [eta: 4 days, 5:22:21, time (data): 1.396 (0.000)] l_pix: 7.7989e-02 
+2025-10-14 17:45:29,049 INFO: [PFT_R..][epoch: 61, iter:  77,500, lr:(5.000e-06,)] [eta: 4 days, 5:19:41, time (data): 1.398 (0.000)] l_pix: 8.1321e-02 
+2025-10-14 17:45:52,265 INFO: Validation RGBNIR_val
+	 # psnr: 24.9339	Best: 24.9341 @ 77000 iter
+	 # ssim: 0.6693	Best: 0.6693 @ 70500 iter
+
+2025-10-14 17:48:11,889 INFO: [PFT_R..][epoch: 62, iter:  77,600, lr:(5.000e-06,)] [eta: 4 days, 5:18:16, time (data): 1.393 (0.001)] l_pix: 7.2009e-02 
+2025-10-14 17:50:31,603 INFO: [PFT_R..][epoch: 62, iter:  77,700, lr:(5.000e-06,)] [eta: 4 days, 5:15:36, time (data): 1.397 (0.000)] l_pix: 5.0102e-02 
+2025-10-14 17:52:51,588 INFO: [PFT_R..][epoch: 62, iter:  77,800, lr:(5.000e-06,)] [eta: 4 days, 5:12:57, time (data): 1.394 (0.000)] l_pix: 8.2750e-02 
+2025-10-14 17:55:11,452 INFO: [PFT_R..][epoch: 62, iter:  77,900, lr:(5.000e-06,)] [eta: 4 days, 5:10:18, time (data): 1.398 (0.000)] l_pix: 5.4545e-02 
+2025-10-14 17:57:31,386 INFO: [PFT_R..][epoch: 62, iter:  78,000, lr:(5.000e-06,)] [eta: 4 days, 5:07:39, time (data): 1.398 (0.000)] l_pix: 5.7781e-02 
+2025-10-14 17:57:54,452 INFO: Validation RGBNIR_val
+	 # psnr: 24.9342	Best: 24.9342 @ 78000 iter
+	 # ssim: 0.6693	Best: 0.6693 @ 78000 iter
+
+2025-10-14 18:00:14,188 INFO: [PFT_R..][epoch: 62, iter:  78,100, lr:(5.000e-06,)] [eta: 4 days, 5:06:13, time (data): 1.397 (0.000)] l_pix: 4.5612e-02 
+2025-10-14 18:02:33,995 INFO: [PFT_R..][epoch: 62, iter:  78,200, lr:(5.000e-06,)] [eta: 4 days, 5:03:34, time (data): 1.391 (0.000)] l_pix: 6.1127e-02 
+2025-10-14 18:04:53,835 INFO: [PFT_R..][epoch: 62, iter:  78,300, lr:(5.000e-06,)] [eta: 4 days, 5:00:55, time (data): 1.398 (0.000)] l_pix: 7.5811e-02 
+2025-10-14 18:07:13,538 INFO: [PFT_R..][epoch: 62, iter:  78,400, lr:(5.000e-06,)] [eta: 4 days, 4:58:15, time (data): 1.397 (0.000)] l_pix: 7.4485e-02 
+2025-10-14 18:09:33,527 INFO: [PFT_R..][epoch: 62, iter:  78,500, lr:(5.000e-06,)] [eta: 4 days, 4:55:36, time (data): 1.400 (0.000)] l_pix: 6.4909e-02 
+2025-10-14 18:09:56,691 INFO: Validation RGBNIR_val
+	 # psnr: 24.9347	Best: 24.9347 @ 78500 iter
+	 # ssim: 0.6693	Best: 0.6693 @ 78500 iter
+
+2025-10-14 18:12:16,474 INFO: [PFT_R..][epoch: 62, iter:  78,600, lr:(5.000e-06,)] [eta: 4 days, 4:54:10, time (data): 1.403 (0.000)] l_pix: 6.6679e-02 
+2025-10-14 18:14:36,461 INFO: [PFT_R..][epoch: 62, iter:  78,700, lr:(5.000e-06,)] [eta: 4 days, 4:51:32, time (data): 1.400 (0.000)] l_pix: 6.8734e-02 
+2025-10-14 18:16:56,512 INFO: [PFT_R..][epoch: 63, iter:  78,800, lr:(5.000e-06,)] [eta: 4 days, 4:48:53, time (data): 1.399 (0.000)] l_pix: 4.5535e-02 
+2025-10-14 18:19:16,464 INFO: [PFT_R..][epoch: 63, iter:  78,900, lr:(5.000e-06,)] [eta: 4 days, 4:46:14, time (data): 1.399 (0.000)] l_pix: 5.9711e-02 
+2025-10-14 18:21:36,390 INFO: [PFT_R..][epoch: 63, iter:  79,000, lr:(5.000e-06,)] [eta: 4 days, 4:43:35, time (data): 1.398 (0.000)] l_pix: 5.9536e-02 
+2025-10-14 18:21:59,345 INFO: Validation RGBNIR_val
+	 # psnr: 24.9346	Best: 24.9347 @ 78500 iter
+	 # ssim: 0.6693	Best: 0.6693 @ 78500 iter
+
+2025-10-14 18:24:19,292 INFO: [PFT_R..][epoch: 63, iter:  79,100, lr:(5.000e-06,)] [eta: 4 days, 4:42:09, time (data): 1.399 (0.000)] l_pix: 5.0032e-02 
+2025-10-14 18:26:39,043 INFO: [PFT_R..][epoch: 63, iter:  79,200, lr:(5.000e-06,)] [eta: 4 days, 4:39:30, time (data): 1.403 (0.000)] l_pix: 6.0464e-02 
+2025-10-14 18:28:58,926 INFO: [PFT_R..][epoch: 63, iter:  79,300, lr:(5.000e-06,)] [eta: 4 days, 4:36:51, time (data): 1.399 (0.000)] l_pix: 7.0802e-02 
+2025-10-14 18:31:18,749 INFO: [PFT_R..][epoch: 63, iter:  79,400, lr:(5.000e-06,)] [eta: 4 days, 4:34:11, time (data): 1.403 (0.000)] l_pix: 4.7912e-02 
+2025-10-14 18:33:38,635 INFO: [PFT_R..][epoch: 63, iter:  79,500, lr:(5.000e-06,)] [eta: 4 days, 4:31:33, time (data): 1.399 (0.000)] l_pix: 4.3208e-02 
+2025-10-14 18:34:01,774 INFO: Validation RGBNIR_val
+	 # psnr: 24.9343	Best: 24.9347 @ 78500 iter
+	 # ssim: 0.6693	Best: 0.6693 @ 78500 iter
+
+2025-10-14 18:36:21,690 INFO: [PFT_R..][epoch: 63, iter:  79,600, lr:(5.000e-06,)] [eta: 4 days, 4:30:06, time (data): 1.407 (0.000)] l_pix: 6.4867e-02 
+2025-10-14 18:38:41,658 INFO: [PFT_R..][epoch: 63, iter:  79,700, lr:(5.000e-06,)] [eta: 4 days, 4:27:28, time (data): 1.400 (0.000)] l_pix: 5.9686e-02 
+2025-10-14 18:41:01,737 INFO: [PFT_R..][epoch: 63, iter:  79,800, lr:(5.000e-06,)] [eta: 4 days, 4:24:49, time (data): 1.394 (0.000)] l_pix: 5.1356e-02 
+2025-10-14 18:43:21,665 INFO: [PFT_R..][epoch: 63, iter:  79,900, lr:(5.000e-06,)] [eta: 4 days, 4:22:11, time (data): 1.399 (0.000)] l_pix: 6.5694e-02 
+2025-10-14 18:45:41,579 INFO: [PFT_R..][epoch: 63, iter:  80,000, lr:(5.000e-06,)] [eta: 4 days, 4:19:32, time (data): 1.398 (0.000)] l_pix: 6.5210e-02 
+2025-10-14 18:45:41,579 INFO: Saving models and training states.
+2025-10-14 18:46:05,885 INFO: Validation RGBNIR_val
+	 # psnr: 24.9343	Best: 24.9347 @ 78500 iter
+	 # ssim: 0.6693	Best: 0.6693 @ 78500 iter
+
+2025-10-14 18:48:25,668 INFO: [PFT_R..][epoch: 64, iter:  80,100, lr:(5.000e-06,)] [eta: 4 days, 4:18:09, time (data): 1.398 (0.001)] l_pix: 7.4562e-02 
+2025-10-14 18:50:45,469 INFO: [PFT_R..][epoch: 64, iter:  80,200, lr:(5.000e-06,)] [eta: 4 days, 4:15:30, time (data): 1.395 (0.000)] l_pix: 5.5286e-02 
+2025-10-14 18:53:05,494 INFO: [PFT_R..][epoch: 64, iter:  80,300, lr:(5.000e-06,)] [eta: 4 days, 4:12:51, time (data): 1.400 (0.000)] l_pix: 4.4861e-02 
+2025-10-14 18:55:25,514 INFO: [PFT_R..][epoch: 64, iter:  80,400, lr:(5.000e-06,)] [eta: 4 days, 4:10:13, time (data): 1.400 (0.000)] l_pix: 6.2986e-02 
+2025-10-14 18:57:45,449 INFO: [PFT_R..][epoch: 64, iter:  80,500, lr:(5.000e-06,)] [eta: 4 days, 4:07:34, time (data): 1.399 (0.000)] l_pix: 5.2510e-02 
+2025-10-14 18:58:08,433 INFO: Validation RGBNIR_val
+	 # psnr: 24.9344	Best: 24.9347 @ 78500 iter
+	 # ssim: 0.6693	Best: 0.6693 @ 80500 iter
+
+2025-10-14 19:00:28,207 INFO: [PFT_R..][epoch: 64, iter:  80,600, lr:(5.000e-06,)] [eta: 4 days, 4:06:07, time (data): 1.399 (0.000)] l_pix: 6.9361e-02 
+2025-10-14 19:02:48,092 INFO: [PFT_R..][epoch: 64, iter:  80,700, lr:(5.000e-06,)] [eta: 4 days, 4:03:28, time (data): 1.399 (0.000)] l_pix: 6.3955e-02 
+2025-10-14 19:05:07,737 INFO: [PFT_R..][epoch: 64, iter:  80,800, lr:(5.000e-06,)] [eta: 4 days, 4:00:48, time (data): 1.398 (0.000)] l_pix: 7.7920e-02 
+2025-10-14 19:07:27,739 INFO: [PFT_R..][epoch: 64, iter:  80,900, lr:(5.000e-06,)] [eta: 4 days, 3:58:10, time (data): 1.400 (0.000)] l_pix: 5.1078e-02 
+2025-10-14 19:09:47,510 INFO: [PFT_R..][epoch: 64, iter:  81,000, lr:(5.000e-06,)] [eta: 4 days, 3:55:31, time (data): 1.399 (0.000)] l_pix: 4.8265e-02 
+2025-10-14 19:10:10,774 INFO: Validation RGBNIR_val
+	 # psnr: 24.9346	Best: 24.9347 @ 78500 iter
+	 # ssim: 0.6694	Best: 0.6694 @ 81000 iter
+
+2025-10-14 19:12:30,326 INFO: [PFT_R..][epoch: 64, iter:  81,100, lr:(5.000e-06,)] [eta: 4 days, 3:54:03, time (data): 1.396 (0.000)] l_pix: 5.6717e-02 
+2025-10-14 19:14:50,307 INFO: [PFT_R..][epoch: 64, iter:  81,200, lr:(5.000e-06,)] [eta: 4 days, 3:51:25, time (data): 1.398 (0.000)] l_pix: 6.2053e-02 
+2025-10-14 19:17:10,444 INFO: [PFT_R..][epoch: 65, iter:  81,300, lr:(5.000e-06,)] [eta: 4 days, 3:48:47, time (data): 1.402 (0.001)] l_pix: 5.2556e-02 
+2025-10-14 19:19:30,190 INFO: [PFT_R..][epoch: 65, iter:  81,400, lr:(5.000e-06,)] [eta: 4 days, 3:46:08, time (data): 1.399 (0.001)] l_pix: 5.7396e-02 
+2025-10-14 19:21:50,030 INFO: [PFT_R..][epoch: 65, iter:  81,500, lr:(5.000e-06,)] [eta: 4 days, 3:43:29, time (data): 1.398 (0.000)] l_pix: 5.7214e-02 
+2025-10-14 19:22:13,069 INFO: Validation RGBNIR_val
+	 # psnr: 24.9342	Best: 24.9347 @ 78500 iter
+	 # ssim: 0.6693	Best: 0.6694 @ 81000 iter
+
+2025-10-14 19:24:32,700 INFO: [PFT_R..][epoch: 65, iter:  81,600, lr:(5.000e-06,)] [eta: 4 days, 3:42:00, time (data): 1.397 (0.000)] l_pix: 7.1251e-02 
+2025-10-14 19:26:52,547 INFO: [PFT_R..][epoch: 65, iter:  81,700, lr:(5.000e-06,)] [eta: 4 days, 3:39:22, time (data): 1.399 (0.000)] l_pix: 6.0618e-02 
+2025-10-14 19:29:12,574 INFO: [PFT_R..][epoch: 65, iter:  81,800, lr:(5.000e-06,)] [eta: 4 days, 3:36:44, time (data): 1.399 (0.000)] l_pix: 7.6564e-02 
+2025-10-14 19:31:32,559 INFO: [PFT_R..][epoch: 65, iter:  81,900, lr:(5.000e-06,)] [eta: 4 days, 3:34:05, time (data): 1.399 (0.000)] l_pix: 5.2781e-02 
+2025-10-14 19:33:52,506 INFO: [PFT_R..][epoch: 65, iter:  82,000, lr:(5.000e-06,)] [eta: 4 days, 3:31:27, time (data): 1.399 (0.000)] l_pix: 5.6902e-02 
+2025-10-14 19:34:15,635 INFO: Validation RGBNIR_val
+	 # psnr: 24.9343	Best: 24.9347 @ 78500 iter
+	 # ssim: 0.6693	Best: 0.6694 @ 81000 iter
+
+2025-10-14 19:36:35,423 INFO: [PFT_R..][epoch: 65, iter:  82,100, lr:(5.000e-06,)] [eta: 4 days, 3:29:59, time (data): 1.398 (0.000)] l_pix: 5.9184e-02 
+2025-10-14 19:38:55,339 INFO: [PFT_R..][epoch: 65, iter:  82,200, lr:(5.000e-06,)] [eta: 4 days, 3:27:20, time (data): 1.399 (0.000)] l_pix: 6.6150e-02 
+2025-10-14 19:41:15,262 INFO: [PFT_R..][epoch: 65, iter:  82,300, lr:(5.000e-06,)] [eta: 4 days, 3:24:42, time (data): 1.399 (0.000)] l_pix: 6.1548e-02 
+2025-10-14 19:43:35,263 INFO: [PFT_R..][epoch: 65, iter:  82,400, lr:(5.000e-06,)] [eta: 4 days, 3:22:04, time (data): 1.400 (0.000)] l_pix: 6.5285e-02 
+2025-10-14 19:45:55,292 INFO: [PFT_R..][epoch: 65, iter:  82,500, lr:(5.000e-06,)] [eta: 4 days, 3:19:26, time (data): 1.401 (0.000)] l_pix: 5.3919e-02 
+2025-10-14 19:46:18,577 INFO: Validation RGBNIR_val
+	 # psnr: 24.9345	Best: 24.9347 @ 78500 iter
+	 # ssim: 0.6694	Best: 0.6694 @ 82500 iter
+
+2025-10-14 19:48:38,515 INFO: [PFT_R..][epoch: 66, iter:  82,600, lr:(5.000e-06,)] [eta: 4 days, 3:17:58, time (data): 1.400 (0.001)] l_pix: 5.6936e-02 
+2025-10-14 19:50:58,381 INFO: [PFT_R..][epoch: 66, iter:  82,700, lr:(5.000e-06,)] [eta: 4 days, 3:15:20, time (data): 1.398 (0.000)] l_pix: 7.1627e-02 
+2025-10-14 19:53:18,297 INFO: [PFT_R..][epoch: 66, iter:  82,800, lr:(5.000e-06,)] [eta: 4 days, 3:12:41, time (data): 1.399 (0.000)] l_pix: 1.0031e-01 
+2025-10-14 19:55:38,079 INFO: [PFT_R..][epoch: 66, iter:  82,900, lr:(5.000e-06,)] [eta: 4 days, 3:10:03, time (data): 1.398 (0.000)] l_pix: 7.8257e-02 
+2025-10-14 19:57:58,001 INFO: [PFT_R..][epoch: 66, iter:  83,000, lr:(5.000e-06,)] [eta: 4 days, 3:07:25, time (data): 1.398 (0.000)] l_pix: 6.1955e-02 
+2025-10-14 19:58:21,063 INFO: Validation RGBNIR_val
+	 # psnr: 24.9347	Best: 24.9347 @ 78500 iter
+	 # ssim: 0.6693	Best: 0.6694 @ 82500 iter
+
+2025-10-14 20:00:40,966 INFO: [PFT_R..][epoch: 66, iter:  83,100, lr:(5.000e-06,)] [eta: 4 days, 3:05:55, time (data): 1.399 (0.000)] l_pix: 6.7816e-02 
+2025-10-14 20:03:00,844 INFO: [PFT_R..][epoch: 66, iter:  83,200, lr:(5.000e-06,)] [eta: 4 days, 3:03:17, time (data): 1.399 (0.000)] l_pix: 6.1937e-02 
+2025-10-14 20:05:20,823 INFO: [PFT_R..][epoch: 66, iter:  83,300, lr:(5.000e-06,)] [eta: 4 days, 3:00:39, time (data): 1.399 (0.000)] l_pix: 6.3433e-02 
+2025-10-14 20:07:40,522 INFO: [PFT_R..][epoch: 66, iter:  83,400, lr:(5.000e-06,)] [eta: 4 days, 2:58:01, time (data): 1.398 (0.000)] l_pix: 6.2408e-02 
+2025-10-14 20:10:00,389 INFO: [PFT_R..][epoch: 66, iter:  83,500, lr:(5.000e-06,)] [eta: 4 days, 2:55:23, time (data): 1.399 (0.000)] l_pix: 5.3571e-02 
+2025-10-14 20:10:23,560 INFO: Validation RGBNIR_val
+	 # psnr: 24.9347	Best: 24.9347 @ 78500 iter
+	 # ssim: 0.6693	Best: 0.6694 @ 82500 iter
+
+2025-10-14 20:12:43,273 INFO: [PFT_R..][epoch: 66, iter:  83,600, lr:(5.000e-06,)] [eta: 4 days, 2:53:52, time (data): 1.398 (0.000)] l_pix: 6.7115e-02 
+2025-10-14 20:15:03,114 INFO: [PFT_R..][epoch: 66, iter:  83,700, lr:(5.000e-06,)] [eta: 4 days, 2:51:14, time (data): 1.399 (0.000)] l_pix: 5.5844e-02 

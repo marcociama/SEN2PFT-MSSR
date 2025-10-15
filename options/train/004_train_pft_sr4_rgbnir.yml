@@ -1,0 +1,103 @@
+# configs/train_pft_sr4_rgbnir.yml
+
+name: PFT_RGBNIR_x4
+model_type: PFTModel
+scale: 4
+num_gpu: 1
+manual_seed: 42
+find_unused_parameters: true
+
+datasets:
+  train:
+    name: RGBNIR_SR_train
+    type: PairedImageDataset
+    dataroot_gt: /home/jovyan/SEN2NAIP_5k/GT
+    dataroot_lq: /home/jovyan/SEN2NAIP_5k/LQ
+    io_backend:
+      type: disk
+    filename_tmpl: '{}'
+    gt_size: 256
+    use_hflip: true
+    use_rot: true
+    num_worker_per_gpu: 8
+    batch_size_per_gpu: 8
+    dataset_enlarge_ratio: 1
+    prefetch_mode: cuda
+    pin_memory: true
+    persistent_workers: true
+
+  val:
+    name: RGBNIR_val
+    type: PairedImageDataset
+    dataroot_gt: /home/jovyan/SEN2NAIP_5k_val/GT
+    dataroot_lq: /home/jovyan/SEN2NAIP_5k_val/LQ
+    io_backend:
+      type: disk
+
+network_g:
+  type: PFT
+  upscale: 4
+  in_chans: 4
+  embed_dim: 240
+  depths: [4, 4, 4, 6, 6, 6]
+  num_heads: 6
+  num_topk: [1024, 1024, 1024, 1024,
+             256, 256, 256, 256,
+             128, 128, 128, 128,
+             64, 64, 64, 64, 64, 64,
+             32, 32, 32, 32, 32, 32,
+             16, 16, 16, 16, 16, 16]
+  window_size: 32
+  convffn_kernel_size: 7
+  mlp_ratio: 2.
+  upsampler: pixelshuffle
+  resi_connection: 1conv
+  use_checkpoint: true
+  img_range: 1.
+
+path:
+  pretrain_network_g: #experiments/PFT_RGBNIR_x4_100k_iter/models/net_g_latest.pth
+  strict_load_g: false
+  resume_state: experiments/PFT_RGBNIR_x4_100k_iter/training_states/50000.state
+
+train:
+  ema_decay: 0.999
+  optim_g:
+    type: AdamW
+    lr: !!float 2e-4
+    weight_decay: 0
+    betas: [0.9, 0.99]
+
+  scheduler:
+    type: MultiStepLR
+    milestones: [85000, 90000,95000]
+    gamma: 0.5
+  total_iter: 100000 #25000 #30000 ---> verificare
+  warmup_iter: 10000
+
+  pixel_opt:
+    type: L1Loss
+    loss_weight: 1.0
+    reduction: mean
+
+val:
+  val_freq: 1000
+  save_img: true
+  metrics:
+    psnr:
+      type: calculate_psnr
+      crop_border: 4
+      test_y_channel: yes
+    ssim:
+      type: calculate_ssim
+      crop_border: 4
+      test_y_channel: yes
+
+logger:
+  print_freq: 100
+  save_checkpoint_freq: 5000
+  use_tb_logger: false
+
+dist_params:
+  backend: nccl
+  port: 29500

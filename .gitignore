@@ -1,0 +1,10 @@
+*.pth
+*.pt
+*.tif
+*.tar.gz
+*.state
+__pycache__/
+.ipynb_checkpoints/
+build/
+dist/
+*.egg-info/
