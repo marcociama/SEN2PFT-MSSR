@@ -31,7 +31,7 @@ Due to file size limitations, trained model weights are hosted on Google Drive.
 
 **Usage:**
 ```bash
-python inference.py --config options/test/003_PFT_SRx4_finetune.yml
+python inference.py -i input_image.tif -o results/custom_location/ --scale 4 --task enel
 ```
 
 ---
