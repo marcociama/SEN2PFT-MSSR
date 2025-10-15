@@ -21,7 +21,7 @@ Modified version of PFT-SR adapted for 4-channel (RGB-NIR) satellite imagery sup
 
 ## Pre-trained Models
 
-**📥 Download Trained Models**: [Google Drive Link - TO BE ADDED]
+**📥 Download Trained Models**: https://drive.google.com/drive/folders/1XGm8KkzYHRj51K4v_Y2621YInharXSos?usp=sharing
 
 Due to file size limitations, trained model weights are hosted on Google Drive.
 
